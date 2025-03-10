@@ -18,7 +18,6 @@ This project aims to classify brain tumors using MRI scans. The dataset consists
 
 ## Project Structure  
 ```
-/brain-tumor-classification
 │── /deployment (Flask Web App)
 │   │── /static (CSS, JS, images for the web interface)
 │   │── /templates (HTML templates for the web app)
@@ -103,7 +102,6 @@ This project aims to classify brain tumors using MRI scans. The dataset consists
 ### **1. Clone the Repository**  
 ```bash
 git clone https://github.com/chiggi24/cs4442_final_project.git
-cd brain-tumor-classification
 ```
 
 ### **2. Install Dependencies**  

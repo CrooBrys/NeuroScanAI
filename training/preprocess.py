@@ -4,8 +4,8 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-DATA_DIR = "training/data"
-OUTPUT_DIR = "training/processed_data"
+DATA_DIR = "data"
+OUTPUT_DIR = "processed_data"
 IMG_SIZE = (224, 224)
 CLASSES = ["Glioma", "Meningioma", "Pituitary", "None"]
 

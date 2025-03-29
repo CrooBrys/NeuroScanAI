@@ -1,10 +1,13 @@
 import numpy as np
+import os
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.applications import ResNet50, VGG16, EfficientNetB0, InceptionV3
 from tensorflow.keras.callbacks import ModelCheckpoint
 from sklearn.model_selection import KFold
+from sklearn.metrics import roc_auc_score
+from sklearn.preprocessing import LabelBinarizer
 
 CLASSES = ["Glioma", "Meningioma", "Pituitary", "None"]
 
@@ -30,25 +33,35 @@ def build_model(base_model_name="ResNet50"):
     model = Model(inputs=base_model.input, outputs=predictions)
     return model
 
-# K-fold Cross-Validation and Hyperparameter Tuning
-def train_k_fold(X_train, y_train, model_name):
+def train_k_fold(X_train, y_train, model_name, save_dir="saved_models"):
+    os.makedirs(save_dir, exist_ok=True)
+
     model = build_model(model_name)
     model.compile(optimizer=Adam(learning_rate=0.0001), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-    
-    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+
+    n_splits = 2
+    kf = KFold(n_splits, shuffle=True, random_state=42)
+    auc_scores = []
 
     for fold, (train_idx, val_idx) in enumerate(kf.split(X_train, y_train)):
-        print(f"Training fold {fold + 1}/5 for {model_name}")
-        
+        print(f"Training fold {fold + 1}/{n_splits} for {model_name}")
+
         X_train_fold, X_val_fold = X_train[train_idx], X_train[val_idx]
         y_train_fold, y_val_fold = y_train[train_idx], y_train[val_idx]
 
-        checkpoint = ModelCheckpoint(f"trained_{model_name}_fold_{fold + 1}.h5", save_best_only=True)
-        
-        model.fit(X_train_fold, y_train_fold, epochs=10, batch_size=32, validation_data=(X_val_fold, y_val_fold), callbacks=[checkpoint])
-        
-        model.load_weights(f"trained_{model_name}_fold_{fold + 1}.h5")
-        print(f"Model saved for fold {fold + 1}")
+        model.fit(X_train_fold, y_train_fold, epochs=1, batch_size=32,
+                  validation_data=(X_val_fold, y_val_fold))
 
-    model.save(f"final_trained_{model_name}.h5")
-    return model
+        y_pred_val = model.predict(X_val_fold)
+        y_val_bin = LabelBinarizer().fit_transform(y_val_fold)
+        fold_auc = roc_auc_score(y_val_bin, y_pred_val, multi_class='ovr')
+        auc_scores.append(fold_auc)
+
+    avg_roc_auc = np.mean(auc_scores)
+    print(f"Average ROC AUC for {model_name}: {avg_roc_auc:.4f}")
+
+    final_model_path = os.path.join(save_dir, f"final_trained_{model_name}.keras")
+    model.save(final_model_path)
+    print(f"Final model saved at {final_model_path}")
+    
+    return model, avg_roc_auc

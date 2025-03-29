@@ -125,3 +125,4 @@ Desktop.ini
 
 # Keep the folder but ignore only the .npy files
 training/processed_data/*.npy
+training/saved_models/*.keras

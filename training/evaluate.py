@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
 import matplotlib.pyplot as plt
@@ -8,8 +9,13 @@ from sklearn.preprocessing import LabelBinarizer
 CLASSES = ["Glioma", "Meningioma", "Pituitary", "None"]
 
 # Function to evaluate the model on test data
-def evaluate_model(model_name, X_test, y_test):
-    model = load_model(f"final_trained_{model_name}.h5")
+def evaluate_model(model_name, X_test, y_test, model_dir="saved_models"):
+    model_path = os.path.join(model_dir, f"final_trained_{model_name}.keras")
+    
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model file not found at {model_path}")
+    
+    model = load_model(model_path)
     
     y_pred_test = model.predict(X_test)
     y_pred_class_test = np.argmax(y_pred_test, axis=1)

@@ -40,6 +40,9 @@ def preprocess_data():
         brightness_range=[0.8, 1.2]
     )
     datagen.fit(X_train)
+    
+    # Ensure output directory exists
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     # Save processed data
     np.save(os.path.join(OUTPUT_DIR, "X_train.npy"), X_train)

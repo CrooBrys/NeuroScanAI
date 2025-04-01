@@ -123,6 +123,5 @@ Desktop.ini
 # Optional: Ignore all hidden files/folders except .git (uncomment if needed)
 # .*/ 
 
-# Keep the folder but ignore only the .npy files
-training/processed_data/*.npy
-training/saved_models/*.keras
+# Ignore learned models
+training/models/*.keras

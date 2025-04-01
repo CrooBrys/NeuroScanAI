@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Brain Tumor Classifier</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <div class="container">
+    <h1>Brain Tumor Classifier</h1>
+    <p>Upload a brain MRI to detect tumor type using your selected model.</p>
+
+    <form id="upload-form">
+      <!-- Image Upload -->
+      <label for="image">Choose Image:</label>
+      <input type="file" id="image" name="file" accept=".jpg,.jpeg,.png" required>
+
+      <!-- Image Preview -->
+      <div id="preview-container">
+        <img id="preview" src="#" alt="Image Preview" style="display:none; max-width:100%;">
+      </div>
+
+      <!-- Model Selector -->
+      <label for="model-select">Choose Model:</label>
+      <select id="model-select" name="model">
+        <option value="resnet50.keras">ResNet50</option>
+        <option value="vgg16.keras">VGG16</option>
+        <option value="efficientnetb0.keras">EfficientNetB0</option>
+        <option value="inceptionv3.keras">InceptionV3</option>
+      </select>
+
+      <!-- Submit -->
+      <button type="submit">Submit</button>
+    </form>
+
+    <!-- Loader and Result -->
+    <div id="loader" style="display:none;">Classifying...</div>
+    <div id="result"></div>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>

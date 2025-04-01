@@ -27,6 +27,10 @@ def train_model(model, X_train, y_train, X_test, y_test):
     lr_scheduler = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=3, min_lr=1e-6)
     model_checkpoint = ModelCheckpoint('best_model.h5', save_best_only=True, monitor='val_loss', mode='min')
 
+    # Compile model with Adam optimizer and weight decay before the loop
+    optimizer = Adam(learning_rate=1e-3, weight_decay=1e-4)
+    model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
     for train_index, val_index in kf.split(X_train):
         print(f"\nTraining Fold {fold_no}...")
 
@@ -36,18 +40,19 @@ def train_model(model, X_train, y_train, X_test, y_test):
 
         # Data Augmentation using the imported function
         datagen = get_data_generator()
-        datagen.fit(X_train_fold)
-
-        # Compile model with Adam optimizer and weight decay
-        optimizer = Adam(learning_rate=1e-3, weight_decay=1e-4)
-        model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
         # Train model with class weights, data augmentation, and callbacks
-        history = model.fit(datagen.flow(X_train_fold, y_train_fold, batch_size=BATCH_SIZE),
-                            validation_data=(X_val_fold, y_val_fold),
-                            epochs=EPOCHS,
-                            class_weight=class_weights,
-                            callbacks=[early_stopping, lr_scheduler, model_checkpoint])
+        history = model.fit(
+            datagen.flow(X_train_fold, y_train_fold, batch_size=BATCH_SIZE),
+            validation_data=(X_val_fold, y_val_fold),
+            epochs=EPOCHS,
+            class_weight=class_weights,
+            callbacks=[early_stopping, lr_scheduler, model_checkpoint],
+            verbose=1
+        )
+
+
+
 
         # Save history of the current fold
         all_train_losses.append(history.history['loss'])

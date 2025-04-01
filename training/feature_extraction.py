@@ -1,4 +1,3 @@
-# feature_extraction.py
 from tensorflow.keras.applications import ResNet50, VGG16, EfficientNetB0, InceptionV3
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Flatten, Dense

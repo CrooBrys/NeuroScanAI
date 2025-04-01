@@ -8,6 +8,13 @@ from config import DATA_DIR, IMAGE_SIZE
 
 def merge_datasets():
     merged_dir = os.path.join(DATA_DIR, "merged")
+    
+    # Check if the merged directory already exists with images
+    if os.path.exists(merged_dir) and len(os.listdir(merged_dir)) > 0:
+        print("Merged dataset already exists, skipping merge.")
+        return merged_dir
+
+    # If the directory exists but is empty, clear and recreate it
     if os.path.exists(merged_dir):
         shutil.rmtree(merged_dir)
     os.makedirs(merged_dir)

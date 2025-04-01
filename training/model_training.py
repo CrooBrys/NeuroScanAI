@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from tensorflow.keras.optimizers import Adam
 from sklearn.utils.class_weight import compute_class_weight
-from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
 import numpy as np
 from config import EPOCHS, BATCH_SIZE
 from data_augmentation import get_data_generator
@@ -11,9 +11,10 @@ def train_model(model, X_train, y_train, X_test, y_test):
     # Compute class weights to handle imbalance
     class_weights = compute_class_weight("balanced", classes=np.unique(y_train), y=y_train)
     class_weights = dict(enumerate(class_weights))
+    print("Class Weights:", class_weights)  # Check computed class weights
 
-    # Set up K-fold cross-validation
-    kf = KFold(n_splits=5, shuffle=True, random_state=42)  # Adjust the number of splits as needed
+    # Set up Stratified K-fold cross-validation
+    kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     fold_no = 1
 
     # For tracking the results across folds
@@ -31,7 +32,7 @@ def train_model(model, X_train, y_train, X_test, y_test):
     optimizer = Adam(learning_rate=1e-3, weight_decay=1e-4)
     model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
-    for train_index, val_index in kf.split(X_train):
+    for train_index, val_index in kf.split(X_train, y_train):
         print(f"\nTraining Fold {fold_no}...")
 
         # Split data into train and validation for this fold
@@ -50,9 +51,6 @@ def train_model(model, X_train, y_train, X_test, y_test):
             callbacks=[early_stopping, lr_scheduler, model_checkpoint],
             verbose=1
         )
-
-
-
 
         # Save history of the current fold
         all_train_losses.append(history.history['loss'])

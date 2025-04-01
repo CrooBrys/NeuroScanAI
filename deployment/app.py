@@ -3,7 +3,7 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'  # Disable oneDNN logs
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'   # Suppress TF warnings/info
 
 from flask import Flask, request, jsonify, render_template
-from keras.models import load_model  # Using standalone keras
+from tensorflow.keras.models import load_model
 import numpy as np
 from PIL import Image
 import io

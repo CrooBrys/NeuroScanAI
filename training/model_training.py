@@ -68,7 +68,7 @@ def train_model(model, model_name, X_train, y_train):
     model.set_weights(best_model_weights)
     model_path = os.path.join("models", f"{model_name}.keras")
     model.save(model_path)
-    print(f"\n✅ Best model across folds saved to: {model_path}")
+    print(f"\nBest model across folds saved to: {model_path}")
 
     # Calculate mean metrics across folds
     avg_train_loss = np.mean(all_train_losses, axis=0)

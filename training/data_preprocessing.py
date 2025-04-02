@@ -52,23 +52,14 @@ def load_all_images():
 
     return np.array(images), np.array(labels)
 
-def print_class_distributions(y, class_names):
-    unique, counts = np.unique(y, return_counts=True)
-    for i, count in zip(unique, counts):
-        print(f"  {class_names[i]}: {count} images")
-
 def preprocess_data(model_name, verbose=True):
-    # Step 1: Load all images and labels
     X, y_raw = load_all_images()
 
     if len(X) == 0 or len(y_raw) == 0:
         print("Error: No data loaded.")
         return None, None, None, None, None
 
-    # Step 2: Apply model-specific preprocessing
     X = apply_model_preprocessing(X.astype('float32'), model_name)
-
-    # Step 3: Encode labels
     encoder = LabelEncoder()
     y = encoder.fit_transform(y_raw)
     class_names = encoder.classes_
@@ -77,20 +68,15 @@ def preprocess_data(model_name, verbose=True):
         print("Class mapping:")
         for i, label in enumerate(class_names):
             print(f"  {i} = {label}")
+        print()
 
-    # Step 4: Balance dataset via augmentation
     X_balanced, y_balanced = balance_with_augmentation(X, y, verbose=verbose)
-
-    # Step 5: Train/test split
     X_train, X_test, y_train, y_test = train_test_split(
         X_balanced, y_balanced, test_size=0.3, stratify=y_balanced, random_state=42
     )
 
     if verbose:
-        print("Train dataset distribution:")
-        print_class_distributions(y_train, class_names)
-
-        print("Test dataset distribution:")
-        print_class_distributions(y_test, class_names)
+        print("Train dataset distribution:", np.bincount(y_train).tolist())
+        print("Test dataset distribution:", np.bincount(y_test).tolist())
 
     return X_train, X_test, y_train, y_test, class_names

@@ -11,7 +11,7 @@ import io
 app = Flask(__name__)
 
 # Class names must match your model output order
-CLASS_NAMES = ['Glioma', 'Meningioma', 'No Tumor', 'Pituitary']
+CLASS_NAMES = ['Glioma', 'Meningioma', 'None', 'Pituitary']
 
 def preprocess_image(image_bytes):
     """Preprocess the uploaded image to fit model input."""

@@ -4,6 +4,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'   # Suppress TF warnings/info
 
 from flask import Flask, request, jsonify, render_template
 from tensorflow.keras.models import load_model
+from tensorflow.keras.applications import resnet50, vgg16, efficientnet, inception_v3
 import numpy as np
 from PIL import Image
 import io
@@ -13,12 +14,34 @@ app = Flask(__name__)
 # Class names must match your model output order
 CLASS_NAMES = ['Glioma', 'Meningioma', 'None', 'Pituitary']
 
-def preprocess_image(image_bytes):
-    """Preprocess the uploaded image to fit model input."""
+def preprocess_image(image_bytes, model_name):
+    """
+    Preprocess an uploaded image to match the input requirements of the selected model.
+    """
+    print(model_name)
+    # Load image and convert to RGB
     image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-    image = image.resize((224, 224))  # Resize to model input size
-    image = np.asarray(image) / 255.0  # Normalize
-    image = np.expand_dims(image, axis=0)  # Add batch dimension
+
+    # Resize to expected input size
+    image = image.resize((224, 224))
+
+    # Convert to float32 NumPy array
+    image = np.asarray(image).astype('float32')
+
+    # Apply model-specific preprocessing
+    if model_name == "ResNet50.keras":
+        image = resnet50.preprocess_input(image)
+    elif model_name == "VGG16.keras":
+        image = vgg16.preprocess_input(image)
+    elif model_name == "EfficientNetB0.keras":
+        image = efficientnet.preprocess_input(image)
+    elif model_name == "InceptionV3.keras":
+        image = inception_v3.preprocess_input(image)
+    else:
+        raise ValueError(f"Unsupported model: {model_name}")
+
+    # Add batch dimension
+    image = np.expand_dims(image, axis=0)
     return image
 
 @app.route('/')
@@ -52,10 +75,13 @@ def upload():
     if file and file.filename.lower().endswith(('.jpg', '.jpeg', '.png')):
         try:
             image_bytes = file.read()
-            image = preprocess_image(image_bytes)
+            image = preprocess_image(image_bytes, model_name)
             prediction = model.predict(image)[0]
             predicted_class = CLASS_NAMES[np.argmax(prediction)]
             confidence = float(np.max(prediction))
+            print("Raw prediction:", prediction)
+            print("Predicted index:", np.argmax(prediction))
+            print("Predicted class:", predicted_class)
             return jsonify({
                 'class': predicted_class,
                 'confidence': round(confidence * 100, 2)

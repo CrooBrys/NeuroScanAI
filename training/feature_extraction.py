@@ -2,7 +2,7 @@ from tensorflow.keras.applications import ResNet50, VGG16, EfficientNetB0, Incep
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Flatten, Dense
 
-def get_feature_extractor(model_name):
+def get_feature_extractor(model_name, fine_tune=False, unfreeze_layers=10):
     if model_name == "ResNet50":
         base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
     elif model_name == "VGG16":
@@ -14,8 +14,13 @@ def get_feature_extractor(model_name):
     else:
         raise ValueError(f"Unsupported model: {model_name}")
 
-    # Freeze base model layers
+    # Freeze all layers initially
     base_model.trainable = False
+
+    # Unfreeze the top `unfreeze_layers` if fine-tuning
+    if fine_tune:
+        for layer in base_model.layers[-unfreeze_layers:]:
+            layer.trainable = True
 
     # Add custom classification head
     x = Flatten()(base_model.output)

@@ -20,6 +20,7 @@ def train_model(model, model_name, X_train, y_train):
     all_val_losses = []
     all_train_accuracies = []
     all_val_accuracies = []
+    fold_val_accuracies = []  # Track best val accuracy per fold
 
     # Callbacks (reused across folds)
     early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
@@ -56,8 +57,10 @@ def train_model(model, model_name, X_train, y_train):
         all_train_accuracies.append(history.history['accuracy'])
         all_val_accuracies.append(history.history['val_accuracy'])
 
-        # Check if this fold has the best validation accuracy
-        val_acc = history.history['val_accuracy'][-1]
+        # Check if this fold has the best validation accuracy (best across all epochs)
+        val_acc = max(history.history['val_accuracy'])
+        fold_val_accuracies.append(val_acc)
+
         if val_acc > best_val_accuracy:
             best_val_accuracy = val_acc
             best_model_weights = model.get_weights()
@@ -94,6 +97,14 @@ def train_model(model, model_name, X_train, y_train):
     plt.title('Average Accuracy Curve Across Folds')
 
     plt.tight_layout()
+    plt.show()
+
+    # Box Plot of Fold Validation Accuracies
+    plt.figure(figsize=(6, 4))
+    plt.boxplot(fold_val_accuracies, vert=True, patch_artist=True)
+    plt.title("Validation Accuracy Distribution Across Folds")
+    plt.ylabel("Validation Accuracy")
+    plt.grid(True)
     plt.show()
 
     return model

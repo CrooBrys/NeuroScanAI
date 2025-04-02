@@ -66,7 +66,7 @@ def train_model(model, model_name, X_train, y_train):
 
     # Load best model weights and save
     model.set_weights(best_model_weights)
-    model_path = os.path.join("models", f"{model_name.lower()}.keras")
+    model_path = os.path.join("models", f"{model_name}.keras")
     model.save(model_path)
     print(f"\n✅ Best model across folds saved to: {model_path}")
 

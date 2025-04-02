@@ -53,13 +53,13 @@ def load_all_images():
     return np.array(images), np.array(labels)
 
 def preprocess_data(model_name, verbose=True):
+    # Step 1: Load raw images and labels
     X, y_raw = load_all_images()
-
     if len(X) == 0 or len(y_raw) == 0:
         print("Error: No data loaded.")
         return None, None, None, None, None
 
-    X = apply_model_preprocessing(X.astype('float32'), model_name)
+    # Step 2: Encode labels
     encoder = LabelEncoder()
     y = encoder.fit_transform(y_raw)
     class_names = encoder.classes_
@@ -70,7 +70,15 @@ def preprocess_data(model_name, verbose=True):
             print(f"  {i} = {label}")
         print()
 
-    X_balanced, y_balanced = balance_with_augmentation(X, y, target_class_size=None, verbose=verbose, samples_per_class=2)
+    # Step 3: Apply augmentation BEFORE model preprocessing
+    X_balanced, y_balanced = balance_with_augmentation(
+        X, y, target_class_size=None, verbose=verbose, samples_per_class=2
+    )
+
+    # Step 4: Model-specific preprocessing AFTER augmentation
+    X_balanced = apply_model_preprocessing(X_balanced.astype('float32'), model_name)
+
+    # Step 5: Train/test split
     X_train, X_test, y_train, y_test = train_test_split(
         X_balanced, y_balanced, test_size=0.3, stratify=y_balanced, random_state=42
     )

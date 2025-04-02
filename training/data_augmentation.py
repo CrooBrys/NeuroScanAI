@@ -4,13 +4,13 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 def balance_with_augmentation(X, y, target_class_size=None, verbose=True, samples_per_class=3, random_state=42):
     datagen = ImageDataGenerator(
-        rotation_range=20,
-        width_shift_range=0.2,
-        height_shift_range=0.2,
-        horizontal_flip=True,
-        zoom_range=0.2,
-        brightness_range=[0.8, 1.2],
-        fill_mode='nearest'
+        rotation_range=15,
+        width_shift_range=0.05,
+        height_shift_range=0.05,
+        zoom_range=0.1,
+        brightness_range=[0.95, 1.05],
+        fill_mode='nearest',
+        horizontal_flip=True  # now acceptable, but optional
     )
     
     # Set numpy random seed

@@ -1,7 +1,7 @@
 import numpy as np
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-def balance_with_augmentation(X, y, target_class_size=None):
+def balance_with_augmentation(X, y, target_class_size=None, verbose=True):
     """
     Balances the dataset using data augmentation to match the highest class count.
 
@@ -9,6 +9,7 @@ def balance_with_augmentation(X, y, target_class_size=None):
     - X: numpy array of images (shape: [num_samples, height, width, channels])
     - y: numpy array of labels (integers)
     - target_class_size: if specified, all classes will be augmented to this size
+    - verbose: whether to print class distribution and augmentation details
 
     Returns:
     - X_balanced: numpy array of balanced images
@@ -28,12 +29,12 @@ def balance_with_augmentation(X, y, target_class_size=None):
     unique_classes, class_counts = np.unique(y, return_counts=True)
     max_samples = target_class_size if target_class_size else np.max(class_counts)
 
-    print("Original class distribution:")
-    for cls, count in zip(unique_classes, class_counts):
-        print(f"  Class {cls}: {count} images")
+    if verbose:
+        print("Original class distribution:")
+        for cls, count in zip(unique_classes, class_counts):
+            print(f"  Class {cls}: {count} images")
 
-    X_balanced = []
-    y_balanced = []
+    X_balanced, y_balanced = [], []
 
     for cls in unique_classes:
         cls_indices = np.where(y == cls)[0]
@@ -46,19 +47,21 @@ def balance_with_augmentation(X, y, target_class_size=None):
         X_balanced.extend(X_cls)
         y_balanced.extend(y_cls)
 
-        if num_to_add > 0:
+        if num_to_add > 0 and verbose:
             print(f"Augmenting class {cls} with {num_to_add} synthetic samples...")
-            temp_gen = datagen.flow(X_cls, y_cls, batch_size=1)
-            for _ in range(num_to_add):
-                x_aug, y_aug = next(temp_gen)
-                X_balanced.append(x_aug[0])
-                y_balanced.append(y_aug[0])
+
+        temp_gen = datagen.flow(X_cls, y_cls, batch_size=1)
+        for _ in range(num_to_add):
+            x_aug, y_aug = next(temp_gen)
+            X_balanced.append(x_aug[0])
+            y_balanced.append(y_aug[0])
 
     X_balanced = np.array(X_balanced)
     y_balanced = np.array(y_balanced)
 
-    print("Final balanced dataset shape:")
-    print("  Images:", X_balanced.shape)
-    print("  Labels:", y_balanced.shape)
+    if verbose:
+        print("Final balanced dataset shape:")
+        print(f"  Images: {X_balanced.shape}")
+        print(f"  Labels: {y_balanced.shape}")
 
     return X_balanced, y_balanced

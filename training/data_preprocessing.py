@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from config import DATA_DIR, IMAGE_SIZE
-from data_augmentation import balance_with_augmentation  # Make sure this import matches your project structure
+from data_augmentation import balance_with_augmentation
 from tensorflow.keras.applications import resnet50, vgg16, efficientnet, inception_v3
 
 def apply_model_preprocessing(X, model_name):
@@ -52,7 +52,12 @@ def load_all_images():
 
     return np.array(images), np.array(labels)
 
-def preprocess_data(model_name, show_class_mapping=True):
+def print_class_distributions(y, class_names):
+    unique, counts = np.unique(y, return_counts=True)
+    for i, count in zip(unique, counts):
+        print(f"  {class_names[i]}: {count} images")
+
+def preprocess_data(model_name, verbose=True):
     # Step 1: Load all images and labels
     X, y_raw = load_all_images()
 
@@ -68,21 +73,24 @@ def preprocess_data(model_name, show_class_mapping=True):
     y = encoder.fit_transform(y_raw)
     class_names = encoder.classes_
 
-    if show_class_mapping:
+    if verbose:
         print("Class mapping:")
         for i, label in enumerate(class_names):
             print(f"  {i} = {label}")
-            
 
     # Step 4: Balance dataset via augmentation
-    X_balanced, y_balanced = balance_with_augmentation(X, y)
+    X_balanced, y_balanced = balance_with_augmentation(X, y, verbose=verbose)
 
     # Step 5: Train/test split
     X_train, X_test, y_train, y_test = train_test_split(
         X_balanced, y_balanced, test_size=0.3, stratify=y_balanced, random_state=42
     )
 
-    print("Train label distribution:", np.bincount(y_train))
-    print("Test label distribution: ", np.bincount(y_test))
+    if verbose:
+        print("Train dataset distribution:")
+        print_class_distributions(y_train, class_names)
+
+        print("Test dataset distribution:")
+        print_class_distributions(y_test, class_names)
 
     return X_train, X_test, y_train, y_test, class_names

@@ -62,10 +62,17 @@ body {
   }
   
   #preview {
-    max-width: 100%;
+    max-width: 300px;
+    max-height: 300px;
+    width: auto;
+    height: auto;
     border-radius: 6px;
     margin-top: 10px;
     border: 1px solid #ccc;
+    object-fit: contain;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   #loader {

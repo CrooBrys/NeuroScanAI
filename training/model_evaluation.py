@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import label_binarize
 import numpy as np
 import pandas as pd
-from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve, auc, precision_recall_curve
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve, auc, precision_recall_curve, classification_report
 
 def evaluate_single_model(model, X_test, y_test, class_names):
     """Evaluate a single model with detailed metrics and visualizations."""
@@ -64,9 +64,8 @@ def evaluate_single_model(model, X_test, y_test, class_names):
 def compare_models(trained_models):
     """Compare multiple models using accuracy, F1-score, precision, recall, ROC AUC, and Precision-Recall AUC, and rank them based on validation accuracy in a table."""
     results = []
-    
+    print(f"Evaluating Models...")
     for model_name, data in trained_models.items():
-        print(f"Evaluating Models...")
         
         # Predict probabilities and labels
         y_pred_probs = data["model"].predict(data["X_test"])

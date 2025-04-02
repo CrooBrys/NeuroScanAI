@@ -1,6 +1,7 @@
 import os
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from config import DATA_DIR, IMAGE_SIZE
@@ -52,6 +53,37 @@ def load_all_images():
 
     return np.array(images), np.array(labels)
 
+def show_model_preprocessing_comparison(image, title="image(2).jpg"):
+    img_array = image.astype('float32')
+
+    models = {
+        "Original": img_array,
+        "ResNet50": resnet50.preprocess_input(img_array.copy()),
+        "VGG16": vgg16.preprocess_input(img_array.copy()),
+        "InceptionV3": inception_v3.preprocess_input(img_array.copy()),
+        "EfficientNetB0": efficientnet.preprocess_input(img_array.copy()),
+    }
+
+    fig, axes = plt.subplots(1, len(models), figsize=(20, 5))
+    for ax, (name, processed) in zip(axes, models.items()):
+        # Normalize to [0, 255] for display
+        disp_img = processed.copy()
+        if name != "Original":
+            disp_img = ((disp_img - disp_img.min()) / (disp_img.max() - disp_img.min()) * 255).astype("uint8")
+        ax.imshow(disp_img.astype("uint8"))
+        ax.set_title(name)
+        ax.axis("off")
+
+    plt.suptitle(f"Model Preprocessing Comparison - {title}")
+    plt.tight_layout()
+    plt.show()
+
+    print("Mean pixel values after preprocessing:")
+    for name, processed in models.items():
+        mean = processed.mean()
+        std = processed.std()
+        print(f"  {name}: mean = {mean:.2f}, std = {std:.2f}")
+
 def preprocess_data(model_name, verbose=True):
     # Step 1: Load raw images and labels
     X, y_raw = load_all_images()
@@ -69,6 +101,11 @@ def preprocess_data(model_name, verbose=True):
         for i, label in enumerate(class_names):
             print(f"  {i} = {label}")
         print()
+
+    # Optional visualization
+    if verbose and len(X) > 2:
+        print("Visualizing model-specific preprocessing on sample image (Glioma image[2]):")
+        show_model_preprocessing_comparison(X[2], title="image(2).jpg")
 
     # Step 3: Apply augmentation BEFORE model preprocessing
     X_balanced, y_balanced = balance_with_augmentation(

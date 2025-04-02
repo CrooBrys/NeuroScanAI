@@ -1,7 +1,7 @@
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 
-def get_balanced_data_generator(X_train, y_train, batch_size):
+def get_data_generator(X_train, y_train, batch_size):
     """Creates a data generator with equalized class distribution."""
     
     datagen = ImageDataGenerator(

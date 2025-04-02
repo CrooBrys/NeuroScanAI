@@ -70,7 +70,7 @@ def preprocess_data(model_name, verbose=True):
             print(f"  {i} = {label}")
         print()
 
-    X_balanced, y_balanced = balance_with_augmentation(X, y, verbose=verbose)
+    X_balanced, y_balanced = balance_with_augmentation(X, y, target_class_size=None, verbose=verbose, samples_per_class=2)
     X_train, X_test, y_train, y_test = train_test_split(
         X_balanced, y_balanced, test_size=0.3, stratify=y_balanced, random_state=42
     )

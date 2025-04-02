@@ -1,24 +1,21 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score, roc_curve, auc, precision_score, recall_score, f1_score, precision_recall_curve
 from sklearn.preprocessing import label_binarize
-from sklearn.calibration import calibration_curve
 import numpy as np
+import pandas as pd
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve, auc, precision_recall_curve
 
-def evaluate_model(model, X_test, y_test, class_names):
-    # Predict probabilities and labels
+def evaluate_single_model(model, X_test, y_test, class_names):
+    """Evaluate a single model with detailed metrics and visualizations."""
     y_pred_probs = model.predict(X_test)
     y_pred = y_pred_probs.argmax(axis=1)
 
-    # Print classification report
     print("Classification Report:")
     print(classification_report(y_test, y_pred, target_names=class_names))
-
-    # Calculate accuracy
+    
     accuracy = np.mean(y_pred == y_test)
     print(f"Accuracy: {accuracy:.2f}")
     
-    # Confusion Matrix
     cm = confusion_matrix(y_test, y_pred)
     plt.figure(figsize=(6, 6))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
@@ -26,8 +23,7 @@ def evaluate_model(model, X_test, y_test, class_names):
     plt.ylabel('Actual')
     plt.title('Confusion Matrix')
     plt.show()
-
-    # Normalized Confusion Matrix
+    
     cm_norm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
     plt.figure(figsize=(6, 6))
     sns.heatmap(cm_norm, annot=True, fmt='.2f', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
@@ -36,15 +32,12 @@ def evaluate_model(model, X_test, y_test, class_names):
     plt.title('Normalized Confusion Matrix')
     plt.show()
 
-    # Binarize labels for ROC, PR, and calibration
     class_indices = np.arange(len(class_names))
     y_test_bin = label_binarize(y_test, classes=class_indices)
 
-    # ROC AUC
     roc_auc = roc_auc_score(y_test_bin, y_pred_probs, average="macro", multi_class="ovr")
     print(f"Multiclass ROC AUC Score: {roc_auc:.2f}")
 
-    # ROC Curve
     plt.figure(figsize=(8, 6))
     for i, class_label in enumerate(class_names):
         fpr, tpr, _ = roc_curve(y_test_bin[:, i], y_pred_probs[:, i])
@@ -56,8 +49,7 @@ def evaluate_model(model, X_test, y_test, class_names):
     plt.title("ROC Curve (Multiclass OvR)")
     plt.legend()
     plt.show()
-
-    # Precision-Recall Curve
+    
     plt.figure(figsize=(8, 6))
     for i, class_label in enumerate(class_names):
         precision, recall, _ = precision_recall_curve(y_test_bin[:, i], y_pred_probs[:, i])
@@ -69,27 +61,49 @@ def evaluate_model(model, X_test, y_test, class_names):
     plt.legend()
     plt.show()
 
-    # Calibration Curve
-    plt.figure(figsize=(8, 6))
-    for i, class_label in enumerate(class_names):
-        prob_true, prob_pred = calibration_curve(y_test_bin[:, i], y_pred_probs[:, i], n_bins=10)
-        plt.plot(prob_pred, prob_true, label=class_label)
+def compare_models(trained_models):
+    """Compare multiple models using accuracy, F1-score, precision, recall, ROC AUC, and Precision-Recall AUC, and rank them based on validation accuracy in a table."""
+    results = []
+    
+    for model_name, data in trained_models.items():
+        print(f"Evaluating Models...")
+        
+        # Predict probabilities and labels
+        y_pred_probs = data["model"].predict(data["X_test"])
+        y_pred = y_pred_probs.argmax(axis=1)
+        
+        # Binarize the labels for ROC AUC computation
+        y_test_bin = label_binarize(data["y_test"], classes=np.arange(len(data["class_names"])))
+        
+        # Calculate metrics
+        accuracy = np.mean(y_pred == data["y_test"])
+        f1 = f1_score(data["y_test"], y_pred, average="macro")
+        roc_auc = roc_auc_score(y_test_bin, y_pred_probs, average="macro", multi_class="ovr")
+        precision = precision_score(data["y_test"], y_pred, average="macro")
+        recall = recall_score(data["y_test"], y_pred, average="macro")
+        
+        # Precision-Recall AUC
+        precision_vals, recall_vals, _ = precision_recall_curve(y_test_bin.ravel(), y_pred_probs.ravel())
+        precision_recall_auc = auc(recall_vals, precision_vals)
+        
+        # Append results to the list
+        results.append({
+            "Model": model_name,
+            "Accuracy": accuracy,
+            "Precision": precision,
+            "Recall": recall,
+            "F1 Score": f1,
+            "ROC AUC": roc_auc,
+            "Precision-Recall AUC": precision_recall_auc
+        })
+    
+    # Convert results to a pandas DataFrame
+    results_df = pd.DataFrame(results)
 
-    plt.plot([0, 1], [0, 1], color='gray', linestyle='--')
-    plt.xlabel("Mean Predicted Probability")
-    plt.ylabel("Fraction of Positives")
-    plt.title("Calibration Plot")
-    plt.legend()
-    plt.show()
-
-    # Class Distribution Plots
-    plt.figure(figsize=(12, 6))
-    plt.subplot(1, 2, 1)
-    sns.countplot(x=[class_names[i] for i in y_test])
-    plt.title("True Class Distribution")
-
-    plt.subplot(1, 2, 2)
-    sns.countplot(x=[class_names[i] for i in y_pred])
-    plt.title("Predicted Class Distribution")
-
-    plt.show()
+    # Sort the models by accuracy in descending order for ranking
+    results_df = results_df.sort_values(by="Accuracy", ascending=False).reset_index(drop=True)
+    
+    # Display the table
+    print("\nModel Comparison Table:")
+    
+    return results_df

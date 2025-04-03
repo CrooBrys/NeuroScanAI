@@ -1,15 +1,29 @@
-# Import necessary libraries for model evaluation and visualization
-import seaborn as sns  # For creating heatmaps (e.g., confusion matrix)
-import matplotlib.pyplot as plt  # For plotting visualizations
-from sklearn.preprocessing import label_binarize  # To convert class labels to binary format for ROC/PR curves
-import numpy as np  # For numerical operations
-import pandas as pd  # For handling and organizing results
-from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve, auc, precision_recall_curve, classification_report, matthews_corrcoef, cohen_kappa_score  # Metrics used for evaluating models
+# Import necessary libraries
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import label_binarize
+import numpy as np
+import pandas as pd
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve, auc, precision_recall_curve, classification_report, matthews_corrcoef, cohen_kappa_score
 
 # Function to evaluate a single model on a test set with detailed metrics and visualizations
 def evaluate_single_model(model, X_test, y_test, class_names):
-    """Evaluate a single model with detailed metrics and visualizations."""
-    
+    """
+    Evaluates a model on a test set, providing classification report, accuracy, confusion matrix, and ROC/PR curves.
+
+    Args:
+        model: The trained model to evaluate.
+        X_test (numpy array): Test data for evaluation.
+        y_test (numpy array): True labels corresponding to the test data.
+        class_names (list): List of class names corresponding to the model output.
+
+    Prints evaluation results including:
+        - Classification report (precision, recall, F1-score, and support)
+        - Accuracy score
+        - Confusion matrix (regular and normalized)
+        - ROC and Precision-Recall curves for each class
+        - Matthews Correlation Coefficient (MCC) and Cohen's Kappa score
+    """
     # Get the predicted probabilities and convert them to class predictions
     y_pred_probs = model.predict(X_test)
     y_pred = y_pred_probs.argmax(axis=1)
@@ -82,8 +96,15 @@ def evaluate_single_model(model, X_test, y_test, class_names):
 
 # Function to compare multiple models and present their performance in a formatted table
 def compare_models(trained_models):
-    """Compare models and format results similar to the provided table."""
-    
+    """
+    Compares the performance of multiple trained models and presents the results in a formatted table.
+
+    Args:
+        trained_models (dict): Dictionary where keys are model names and values are the corresponding model data (including predictions and true labels).
+
+    Returns:
+        pd.DataFrame: DataFrame with performance metrics for each model and class.
+    """
     all_results = {}  # Dictionary to store results of each model
     print("Evaluating Models...\n")
 

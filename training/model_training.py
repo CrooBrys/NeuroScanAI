@@ -83,23 +83,30 @@ def train_model(model, model_name, X_train, y_train):
     avg_val_accuracy = np.mean(all_val_accuracies, axis=0)
 
     # Plot average loss and accuracy curves for training and validation across folds
-    plt.figure(figsize=(12, 5))
+    plt.figure(figsize=(14, 6))
 
     # Loss curve plot
     plt.subplot(1, 2, 1)
-    plt.plot(avg_train_loss, label='Train Loss')
-    plt.plot(avg_val_loss, label='Validation Loss')
+    plt.plot(avg_train_loss, label='Train Loss', marker='o')
+    plt.plot(avg_val_loss, label='Validation Loss', marker='x')
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.title(f'{model_name} - Average Loss Across Folds')
     plt.legend()
-    plt.title('Average Loss Curve Across Folds')
+    plt.grid(True)
 
     # Accuracy curve plot
     plt.subplot(1, 2, 2)
-    plt.plot(avg_train_accuracy, label='Train Accuracy')
-    plt.plot(avg_val_accuracy, label='Validation Accuracy')
+    plt.plot(avg_train_accuracy, label='Train Accuracy', marker='o')
+    plt.plot(avg_val_accuracy, label='Validation Accuracy', marker='x')
+    plt.xlabel("Epochs")
+    plt.ylabel("Accuracy")
+    plt.title(f'{model_name} - Average Accuracy Across Folds')
     plt.legend()
-    plt.title('Average Accuracy Curve Across Folds')
+    plt.grid(True)
 
-    plt.tight_layout()  # Adjust layout for better spacing
-    plt.show()  # Display the plots
+    plt.suptitle(f"{model_name} - K-Fold Training Summary", fontsize=16)
+    plt.tight_layout(rect=[0, 0, 1, 0.95])  # Leave space for suptitle
+    plt.show()
 
     return model, fold_val_accuracies  # Return the model with best weights and per-fold validation accuracies

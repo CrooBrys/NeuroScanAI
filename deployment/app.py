@@ -1,4 +1,9 @@
 import os
+
+# Suppress TensorFlow warnings
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 import traceback
 from flask import Flask, request, jsonify, render_template
 from tensorflow.keras.models import load_model
@@ -7,11 +12,6 @@ import numpy as np
 from PIL import Image
 from google.cloud import storage
 import io
-
-# Suppress TensorFlow warnings
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
 app = Flask(__name__)
 bucket_name = os.environ.get("GCS_BUCKET")
 IS_LOCAL = True  # Set to True if testing from ../training/models folder
@@ -123,7 +123,8 @@ if __name__ == '__main__':
     try:
         port = int(os.environ.get("PORT", 8080))
         print(f"[DEBUG] Starting Flask app on port {port}")
-        app.run(host='0.0.0.0', port=port, debug=True)
+        host = 'localhost' if IS_LOCAL else '0.0.0.0'
+        app.run(host=host, port=port, debug=True)
     except Exception as e:
         print(f"[DEBUG] Error starting Flask app: {e}")
         traceback.print_exc()

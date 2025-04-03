@@ -99,12 +99,4 @@ def train_model(model, model_name, X_train, y_train):
     plt.tight_layout()
     plt.show()
 
-    # Box Plot of Fold Validation Accuracies
-    plt.figure(figsize=(6, 4))
-    plt.boxplot(fold_val_accuracies, vert=True, patch_artist=True)
-    plt.title("Validation Accuracy Distribution Across Folds")
-    plt.ylabel("Validation Accuracy")
-    plt.grid(True)
-    plt.show()
-
-    return model
+    return model, fold_val_accuracies

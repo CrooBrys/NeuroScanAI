@@ -20,7 +20,7 @@ def balance_with_augmentation(X, y, target_class_size=None, verbose=True, sample
     max_samples = target_class_size if target_class_size else np.max(class_counts)
 
     if verbose:
-        print("Original class distribution:")
+        print("\nOriginal class distribution:")
         for cls, count in zip(unique_classes, class_counts):
             print(f"  Class {cls}: {count} images")
         print()

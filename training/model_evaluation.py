@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt  # For plotting visualizations
 from sklearn.preprocessing import label_binarize  # To convert class labels to binary format for ROC/PR curves
 import numpy as np  # For numerical operations
 import pandas as pd  # For handling and organizing results
-from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve, auc, precision_recall_curve, classification_report  # Metrics used for evaluating models
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve, auc, precision_recall_curve, classification_report, matthews_corrcoef, cohen_kappa_score  # Metrics used for evaluating models
 
 # Function to evaluate a single model on a test set with detailed metrics and visualizations
 def evaluate_single_model(model, X_test, y_test, class_names):
@@ -73,6 +73,13 @@ def evaluate_single_model(model, X_test, y_test, class_names):
     plt.legend()
     plt.show()
 
+    # Calculate additional metrics
+    mcc = matthews_corrcoef(y_test, y_pred)
+    print(f"MCC: {mcc:.2f}")
+
+    kappa = cohen_kappa_score(y_test, y_pred)
+    print(f"Cohen's Kappa: {kappa:.2f}")
+
 # Function to compare multiple models and present their performance in a formatted table
 def compare_models(trained_models):
     """Compare models and format results similar to the provided table."""
@@ -90,6 +97,7 @@ def compare_models(trained_models):
 
         # Loop over each class to calculate precision, recall, and F1-score
         for class_idx in range(len(data["class_names"])):
+
             class_precision = precision_score(data["y_test"], y_pred, labels=[class_idx], average="macro", zero_division=0)
             class_recall = recall_score(data["y_test"], y_pred, labels=[class_idx], average="macro", zero_division=0)
             class_f1 = f1_score(data["y_test"], y_pred, labels=[class_idx], average="macro", zero_division=0)

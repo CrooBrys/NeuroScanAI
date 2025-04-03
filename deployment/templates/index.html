@@ -1,46 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <title>Brain Tumor Classifier</title>
+  <title>NeuroScanAI — Brain Tumor Classifier</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-  <div class="container">
-    <h1>Brain Tumor Classifier</h1>
-    <p>Upload a brain MRI to detect tumor type using your selected model.</p>
+  <div class="theme-toggle">
+    <label class="switch">
+      <input type="checkbox" id="dark-toggle">
+      <span class="slider"></span>
+    </label>
+  </div>
 
-    <form id="upload-form">
-      <!-- Image Upload -->
-      <label for="image">Choose Image:</label>
-      <input type="file" id="image" name="file" accept=".jpg,.jpeg,.png" required>
+  <div class="app-container">
+    <div class="card">
+      <h1>🧠 NeuroScanAI</h1>
+      <div class="instructions">
+        <p>
+          Please upload a brain MRI image with a <strong>black background</strong>. The model will analyze the scan and classify it into one of the following categories:
+        </p>
+      
+        <div class="list-block">
+          <ul>
+            <li><strong>Glioma</strong></li>
+            <li><strong>Meningioma</strong></li>
+            <li><strong>Pituitary</strong></li>
+            <li><strong>None</strong> (no tumor detected)</li>
+          </ul>
+        </div>
+      
+        <p>After submission, the system will display:</p>
+      
+        <div class="list-block">
+          <ul>
+            <li>Predicted tumor type</li>
+            <li>Model confidence score</li>
+          </ul>
+        </div>
+      </div>          
+      <form id="upload-form">
+        <label for="image">Upload MRI Image</label>
+        <input type="file" id="image" name="file" accept=".jpg,.jpeg,.png" required>
 
-      <!-- Image Preview -->
-      <div id="preview-container">
-        <img id="preview" src="#" alt="Image Preview" style="display:none; max-width:100%;">
-      </div>
+        <div id="preview-container">
+          <img id="preview" src="#" alt="Image Preview" style="display:none;">
+        </div>
 
-      <!-- Model Selector -->
-      <label for="model-select">Choose Model:</label>
-      <select id="model-select" name="model">
-        <option value="ResNet50.keras">ResNet50</option>
-        <option value="VGG16.keras">VGG16</option>
-        <option value="EfficientNetB0.keras">EfficientNetB0</option>
-        <option value="InceptionV3.keras">InceptionV3</option>
-      </select>
+        <label for="model-select">Select a Model</label>
+        <select id="model-select" name="model">
+          <option value="ResNet50.keras">ResNet50</option>
+          <option value="VGG16.keras">VGG16</option>
+          <option value="EfficientNetB0.keras">EfficientNetB0</option>
+          <option value="InceptionV3.keras">InceptionV3</option>
+        </select>
 
-      <!-- Submit -->
-      <button type="submit">Submit</button>
-    </form>
+        <button type="submit">Classify</button>
+      </form>
 
-    <!-- Loader and Result -->
-    <div id="loader" style="display:none;">Classifying...</div>
-    <div id="result"></div>
+      <div id="loader" class="spinner"></div>
+      <div id="result"></div>
+
+      <div id="history" class="history">
+        <strong>Upload History</strong>
+        <div id="history-entries"></div>
+      </div>      
+    </div>
   </div>
 
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
-
 </html>

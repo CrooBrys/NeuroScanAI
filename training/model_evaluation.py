@@ -62,47 +62,42 @@ def evaluate_single_model(model, X_test, y_test, class_names):
     plt.show()
 
 def compare_models(trained_models):
-    """Compare multiple models using accuracy, F1-score, precision, recall, ROC AUC, and Precision-Recall AUC, and rank them based on validation accuracy in a table."""
-    results = []
-    print(f"Evaluating Models...")
+    """Compare models and format results similar to the provided table."""
+    
+    all_results = {}
+    print("Evaluating Models...\n")
+
     for model_name, data in trained_models.items():
-        
-        # Predict probabilities and labels
         y_pred_probs = data["model"].predict(data["X_test"])
         y_pred = y_pred_probs.argmax(axis=1)
-        
-        # Binarize the labels for ROC AUC computation
         y_test_bin = label_binarize(data["y_test"], classes=np.arange(len(data["class_names"])))
-        
-        # Calculate metrics
-        accuracy = np.mean(y_pred == data["y_test"])
-        f1 = f1_score(data["y_test"], y_pred, average="macro")
-        roc_auc = roc_auc_score(y_test_bin, y_pred_probs, average="macro", multi_class="ovr")
-        precision = precision_score(data["y_test"], y_pred, average="macro")
-        recall = recall_score(data["y_test"], y_pred, average="macro")
-        
-        # Precision-Recall AUC
-        precision_vals, recall_vals, _ = precision_recall_curve(y_test_bin.ravel(), y_pred_probs.ravel())
-        precision_recall_auc = auc(recall_vals, precision_vals)
-        
-        # Append results to the list
-        results.append({
-            "Model": model_name,
-            "Accuracy": accuracy,
-            "Precision": precision,
-            "Recall": recall,
-            "F1 Score": f1,
-            "ROC AUC": roc_auc,
-            "Precision-Recall AUC": precision_recall_auc
-        })
-    
-    # Convert results to a pandas DataFrame
-    results_df = pd.DataFrame(results)
 
-    # Sort the models by accuracy in descending order for ranking
-    results_df = results_df.sort_values(by="Accuracy", ascending=False).reset_index(drop=True)
+        per_class_metrics = []
+
+        for class_idx in range(len(data["class_names"])):
+            class_precision = precision_score(data["y_test"], y_pred, labels=[class_idx], average="macro", zero_division=0)
+            class_recall = recall_score(data["y_test"], y_pred, labels=[class_idx], average="macro", zero_division=0)
+            class_f1 = f1_score(data["y_test"], y_pred, labels=[class_idx], average="macro", zero_division=0)
+            per_class_metrics.append([class_precision, class_recall, class_f1])
+
+        per_class_df = pd.DataFrame(per_class_metrics, columns=["Precision", "Recall", "F1-score"])
+
+        accuracy = np.mean(y_pred == data["y_test"])
+        macro_precision = precision_score(data["y_test"], y_pred, average="macro")
+        macro_recall = recall_score(data["y_test"], y_pred, average="macro")
+        macro_f1 = f1_score(data["y_test"], y_pred, average="macro")
+
+        per_class_df.loc["Average"] = [macro_precision, macro_recall, macro_f1]
+        per_class_df.loc["Accuracy"] = [accuracy, np.nan, np.nan]
+
+        all_results[model_name] = per_class_df
+
+    # Combine into one DataFrame
+    combined_df = pd.concat(all_results, axis=1)
     
-    # Display the table
-    print("\nModel Comparison Table:")
-    
-    return results_df
+    # Formatting
+    combined_df = combined_df.round(2)  # Round to match visual style
+    combined_df.fillna("", inplace=True)  # Remove NaNs for a clean table
+    combined_df.index.name = "CLASS"  # Label index
+
+    return combined_df

@@ -4,10 +4,12 @@
   <meta charset="UTF-8">
   <title>NeuroScanAI — Brain Tumor Classifier</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Google Font and stylesheet -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+  <!-- Toggle for light/dark mode -->
   <div class="theme-toggle">
     <label class="switch">
       <input type="checkbox" id="dark-toggle">
@@ -15,33 +17,20 @@
     </label>
   </div>
 
-
   <div class="app-container">
     <div class="card">
       <h1>🧠 NeuroScanAI</h1>
+
+      <!-- App instructions -->
       <div class="instructions">
         <p>
-          Please upload a brain MRI image with a <strong>black background</strong>. The model will analyze the scan and classify it into one of the following categories:
+          Upload a brain MRI image with a <strong>black background</strong>. The model will classify it as 
+          <strong>Glioma</strong>, <strong>Meningioma</strong>, <strong>Pituitary</strong>, or <strong>None</strong>, 
+          and show the <strong>predicted class</strong> with a <strong>confidence score</strong>.
         </p>
-      
-        <div class="list-block">
-          <ul>
-            <li><strong>Glioma</strong></li>
-            <li><strong>Meningioma</strong></li>
-            <li><strong>Pituitary</strong></li>
-            <li><strong>None</strong> (no tumor detected)</li>
-          </ul>
-        </div>
-      
-        <p>After submission, the system will display:</p>
-      
-        <div class="list-block">
-          <ul>
-            <li>Predicted tumor type</li>
-            <li>Model confidence score</li>
-          </ul>
-        </div>
-      </div>          
+      </div>    
+
+      <!-- Upload form section -->
       <form id="upload-form">
         <label for="image">Upload MRI Image</label>
         <input type="file" id="image" name="file" accept=".jpg,.jpeg,.png" required>
@@ -61,16 +50,23 @@
         <button type="submit">Classify</button>
       </form>
 
+      <!-- Loader spinner -->
       <div id="loader" class="spinner"></div>
+
+      <!-- Result container -->
       <div id="result"></div>
 
+      <!-- Upload history -->
       <div id="history" class="history">
         <strong>Upload History</strong>
         <div id="history-entries"></div>
-      </div>      
+      </div>    
     </div>
   </div>
+  <div id="scroll-hint" class="scroll-hint"><strong>Scroll down ↓</strong></div>
 
+
+  <!-- Main JS file -->
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

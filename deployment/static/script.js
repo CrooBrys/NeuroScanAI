@@ -10,19 +10,22 @@ document.addEventListener("DOMContentLoaded", function () {
   const submitBtn = form.querySelector('button[type="submit"]');
   const toggle = document.getElementById("dark-toggle");
 
-  // 🌙 Dark mode toggle
+
+  // Dark mode toggle
   toggle.addEventListener("change", () => {
     document.body.classList.toggle("dark", toggle.checked);
   });
 
-  // 🔄 Reset state on page load
+  // Clear inputs and history on page load
   window.addEventListener('load', () => {
     imageInput.value = '';
     preview.style.display = 'none';
-    historyContainer.innerHTML = ""; // Clear previous entries
+    historyContainer.innerHTML = "";
+    const scrollHint = document.getElementById("scroll-hint");
+    if (scrollHint) scrollHint.classList.remove("visible");
   });
 
-  // 📷 Image preview handler
+  // Preview image when selected
   imageInput.addEventListener("change", () => {
     result.innerHTML = "";
     const file = imageInput.files[0];
@@ -38,12 +41,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // 🧪 Clear result when switching model
+  // Clear result on model change
   modelSelect.addEventListener("change", () => {
     result.innerHTML = "";
   });
 
-  // 🧠 Form submission and prediction
+  // Form submit handler
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -77,45 +80,43 @@ document.addEventListener("DOMContentLoaded", function () {
       if (data.error) {
         result.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
       } else {
-        // 🎯 Show result
+        const fill = document.createElement("div");
+        fill.className = "confidence-fill";
+        fill.style.width = `${data.confidence}%`;
+        fill.textContent = `${data.confidence}%`;
+        fill.style.background = getConfidenceColor(data.confidence);
+
         result.innerHTML = `
           <p>Prediction: <strong>${data.class}</strong></p>
           <p>Confidence: ${data.confidence}%</p>
-          <div class="confidence-bar">
-            <div class="confidence-fill" style="width:${data.confidence}%;">
-              ${data.confidence}%
-            </div>
-          </div>
+          <div class="confidence-bar"></div>
         `;
+        result.querySelector(".confidence-bar").appendChild(fill);
 
-        // 📝 Add to history
         const fileName = file.name;
         const timestamp = new Date().toLocaleString();
-        const confidenceClass =
-          data.confidence >= 85
-            ? "high"
-            : data.confidence >= 60
-            ? "medium"
-            : "low";
 
         const historyEntry = document.createElement("div");
         historyEntry.className = "history-entry";
+
+        const historyFill = document.createElement("div");
+        historyFill.className = "confidence-fill";
+        historyFill.style.width = `${data.confidence}%`;
+        historyFill.textContent = `${data.confidence}%`;
+        historyFill.style.background = getHistoryGradient(data.confidence);
+
         historyEntry.innerHTML = `
           <div class="history-meta">
             <strong>${fileName}</strong> &mdash; ${timestamp}
           </div>
           <div>Prediction: <strong>${data.class}</strong></div>
-          <div class="confidence-bar history-bar ${confidenceClass}">
-            <div class="confidence-fill" style="width:${data.confidence}%;">
-              ${data.confidence}%
-            </div>
-          </div>
+          <div class="confidence-bar history-bar"></div>
           <hr>
         `;
+        historyEntry.querySelector(".history-bar").appendChild(historyFill);
+        historyContainer.prepend(historyEntry);
 
-        if (historyContainer) {
-          historyContainer.prepend(historyEntry);
-        }
+        checkHistoryScrollState(); // Update scrollbar logic
       }
     } catch (err) {
       loader.style.display = "none";
@@ -126,4 +127,66 @@ document.addEventListener("DOMContentLoaded", function () {
       submitBtn.disabled = false;
     }
   });
+
+  // Color logic for live prediction bar
+  function getConfidenceColor(confidence) {
+    const baseHue = 180;
+    const lightness = 70 - (confidence / 100) * 30;
+    return `hsl(${baseHue}, 70%, ${lightness}%)`;
+  }
+
+  // Color logic for history bar (green, yellow, red)
+  function getHistoryGradient(confidence) {
+    const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+    const r = confidence < 60
+      ? 239 + (confidence / 60) * (255 - 239)
+      : confidence < 85
+      ? 255 - ((confidence - 60) / 25) * (255 - 76)
+      : 76 - ((confidence - 85) / 15) * 30;
+
+    const g = confidence < 60
+      ? 83 + (confidence / 60) * (167 - 83)
+      : confidence < 85
+      ? 167 + ((confidence - 60) / 25) * (175 - 167)
+      : 175 - ((confidence - 85) / 15) * 30;
+
+    const b = confidence < 60
+      ? 80 + (confidence / 60) * (38 - 80)
+      : confidence < 85
+      ? 38 + ((confidence - 60) / 25) * (80 - 38)
+      : 80 - ((confidence - 85) / 15) * 10;
+
+    return `rgb(${clamp(r, 0, 255)}, ${clamp(g, 0, 255)}, ${clamp(b, 0, 255)})`;
+  }
+
+  // Handle scroll behavior for upload history
+  let historyScrollRevealed = false;
+
+  function checkHistoryScrollState() {
+    const entries = historyContainer.querySelectorAll(".history-entry");
+  
+    if (entries.length > 2 && !historyScrollRevealed) {
+      history.classList.add("scroll-reveal");
+  
+      const scrollHint = document.getElementById("scroll-hint");
+      console.log("Applying visible class to scroll hint");
+      if (scrollHint) scrollHint.classList.add("visible");
+  
+      // Once the user hovers over the box, hide the hint and lock the state
+      const onFirstHover = () => {
+        historyScrollRevealed = true;
+        history.classList.remove("scroll-reveal");
+        history.classList.add("scrolled");
+  
+        if (scrollHint) {
+          scrollHint.classList.remove("visible");
+        }
+  
+        history.removeEventListener("mouseenter", onFirstHover);
+      };
+  
+      history.addEventListener("mouseenter", onFirstHover);
+    }
+    console.log("Checking history scroll state", entries.length);
+  }  
 });

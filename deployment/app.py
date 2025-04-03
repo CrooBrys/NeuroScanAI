@@ -14,7 +14,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 app = Flask(__name__)
 bucket_name = os.environ.get("GCS_BUCKET")
-IS_LOCAL = False  # Set to True if testing from ../training/models folder
+IS_LOCAL = True  # Set to True if testing from ../training/models folder
 
 CLASS_NAMES = ['Glioma', 'Meningioma', 'None', 'Pituitary']
 

@@ -5,14 +5,24 @@ document.addEventListener("DOMContentLoaded", function () {
   const preview = document.getElementById("preview");
   const loader = document.getElementById("loader");
   const result = document.getElementById("result");
+  const history = document.getElementById("history");
+  const historyContainer = document.getElementById("history-entries");
   const submitBtn = form.querySelector('button[type="submit"]');
+  const toggle = document.getElementById("dark-toggle");
 
+  // 🌙 Dark mode toggle
+  toggle.addEventListener("change", () => {
+    document.body.classList.toggle("dark", toggle.checked);
+  });
+
+  // 🔄 Reset state on page load
   window.addEventListener('load', () => {
     imageInput.value = '';
     preview.style.display = 'none';
+    historyContainer.innerHTML = ""; // Clear previous entries
   });
 
-  // Clear result on new image selection
+  // 📷 Image preview handler
   imageInput.addEventListener("change", () => {
     result.innerHTML = "";
     const file = imageInput.files[0];
@@ -28,12 +38,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Clear result on model change
+  // 🧪 Clear result when switching model
   modelSelect.addEventListener("change", () => {
     result.innerHTML = "";
   });
 
-  // Handle form submission
+  // 🧠 Form submission and prediction
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -49,7 +59,6 @@ document.addEventListener("DOMContentLoaded", function () {
     formData.append("file", file);
     const url = `/upload?model=${encodeURIComponent(selectedModel)}`;
 
-    // Disable all inputs and show loader
     imageInput.disabled = true;
     modelSelect.disabled = true;
     submitBtn.disabled = true;
@@ -68,16 +77,50 @@ document.addEventListener("DOMContentLoaded", function () {
       if (data.error) {
         result.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
       } else {
+        // 🎯 Show result
         result.innerHTML = `
           <p>Prediction: <strong>${data.class}</strong></p>
           <p>Confidence: ${data.confidence}%</p>
+          <div class="confidence-bar">
+            <div class="confidence-fill" style="width:${data.confidence}%;">
+              ${data.confidence}%
+            </div>
+          </div>
         `;
+
+        // 📝 Add to history
+        const fileName = file.name;
+        const timestamp = new Date().toLocaleString();
+        const confidenceClass =
+          data.confidence >= 85
+            ? "high"
+            : data.confidence >= 60
+            ? "medium"
+            : "low";
+
+        const historyEntry = document.createElement("div");
+        historyEntry.className = "history-entry";
+        historyEntry.innerHTML = `
+          <div class="history-meta">
+            <strong>${fileName}</strong> &mdash; ${timestamp}
+          </div>
+          <div>Prediction: <strong>${data.class}</strong></div>
+          <div class="confidence-bar history-bar ${confidenceClass}">
+            <div class="confidence-fill" style="width:${data.confidence}%;">
+              ${data.confidence}%
+            </div>
+          </div>
+          <hr>
+        `;
+
+        if (historyContainer) {
+          historyContainer.prepend(historyEntry);
+        }
       }
     } catch (err) {
       loader.style.display = "none";
       result.innerHTML = `<p style="color:red;">Request failed. Please try again later.</p>`;
     } finally {
-      // Re-enable all inputs
       imageInput.disabled = false;
       modelSelect.disabled = false;
       submitBtn.disabled = false;

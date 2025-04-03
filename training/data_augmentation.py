@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from data_preprocessing import plot_class_distribution
+from utils import plot_class_distribution
 
 # Function to balance the dataset by augmenting under-represented classes
 def balance_with_augmentation(X, y, class_names, target_class_size=None, verbose=True, samples_per_class=3, random_state=42):
@@ -43,7 +43,7 @@ def balance_with_augmentation(X, y, class_names, target_class_size=None, verbose
         for cls, count in zip(unique_classes, class_counts):
             print(f"  Class {cls}: {count} images")  # Print the original class distribution
         plot_class_distribution(y, class_names, "Original Class Distribution")  # Plot the original class distribution
-
+        
     # Initialize lists to hold the balanced data
     X_balanced, y_balanced = [], []
 
@@ -62,6 +62,7 @@ def balance_with_augmentation(X, y, class_names, target_class_size=None, verbose
         temp_gen = datagen.flow(X_cls, y_cls, batch_size=1, shuffle=False, seed=random_state + int(cls))
 
         if verbose and num_to_add > 0:
+            print(f"---\n")
             print(f"Augmenting class {cls} with {num_to_add} synthetic samples...")  # Print progress message
 
         # Generate synthetic samples for the current class
@@ -87,9 +88,12 @@ def balance_with_augmentation(X, y, class_names, target_class_size=None, verbose
 
     if verbose:
         # Print the distribution of classes in the augmented dataset
-        print("\nAugmented class distribution:")
+        print(f"---\n")
+        print("Augmented class distribution:")
         for cls, count in enumerate(np.bincount(y_balanced)):
             print(f"  Class {cls}: {count} images")  # Print class distribution after augmentation
-        print(f"\nFinal dataset shape: {X_balanced.shape}, Labels: {y_balanced.shape}\n")  # Print final dataset shape
+        print(f"\n---\n")
+        print(f"Final dataset shape: {X_balanced.shape}, Labels: {y_balanced.shape}\n")  # Print final dataset shape
+        print(f"---\n")
 
     return X_balanced, y_balanced  # Return the balanced (augmented) image data and labels

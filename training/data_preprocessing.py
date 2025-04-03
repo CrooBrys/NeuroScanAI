@@ -10,6 +10,7 @@ from sklearn.decomposition import PCA
 from config import DATA_DIR, IMAGE_SIZE
 from data_augmentation import balance_with_augmentation
 from tensorflow.keras.applications import resnet50, vgg16, efficientnet, inception_v3
+from utils import plot_class_distribution
 
 # Function to apply model-specific preprocessing
 def apply_model_preprocessing(X, model_name):
@@ -82,25 +83,6 @@ def load_all_images():
 
     return np.array(images), np.array(labels)  # Return the loaded images and labels as numpy arrays
 
-# Function to plot class distribution
-def plot_class_distribution(y, class_names, title="Class Distribution"):
-    """
-    Plots the distribution of classes in the dataset.
-
-    Args:
-        y (numpy array): Array of labels.
-        class_names (list): List of class names.
-        title (str): Title for the plot.
-    """
-    plt.figure(figsize=(6, 4))  # Set the figure size
-    sns.countplot(x=y, palette="viridis", hue=y)  # Create a count plot of the class distribution
-    plt.xticks(range(len(class_names)), class_names, rotation=45)  # Set x-axis labels to class names
-    plt.xlabel("Tumor Type")  # Label for the x-axis
-    plt.ylabel("Number of Samples")  # Label for the y-axis
-    plt.title(title)  # Set the plot title
-    plt.legend(title="Tumor Types", loc='upper right')  # Add a legend to indicate class labels
-    plt.show()  # Display the plot
-
 # Function to visualize PCA of image dataset
 def visualize_pca(X, y, title="PCA of Image Dataset"):
     """
@@ -148,6 +130,7 @@ def preprocess_data(model_name, verbose=True):
         print("\nDataset Summary:")
         print(f"  Total Images: {len(X)}")  # Print total number of images
         print(f"  Image Shape: {X.shape[1:]}")  # Print the shape of the images (height, width, channels)
+        print(f"\n---")
 
     # Dynamically determine max class size for augmentation
     max_class_size = max(np.bincount(y))  # Find the maximum number of samples in any class
@@ -168,6 +151,7 @@ def preprocess_data(model_name, verbose=True):
         print("Test dataset distribution:", np.bincount(y_test).tolist())  # Print the distribution of classes in the testing set
         plot_class_distribution(y_train, class_names, "Training Class Distribution")  # Plot the training class distribution
         plot_class_distribution(y_test, class_names, "Testing Class Distribution")  # Plot the testing class distribution
+        print(f"---\n")
         visualize_pca(X_train, y_train, "PCA of Training Data")  # Visualize PCA of the training data
 
     return X_train, X_test, y_train, y_test, class_names  # Return the processed data

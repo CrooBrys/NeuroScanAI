@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 from sklearn.model_selection import StratifiedKFold
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint, TensorBoard 
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 from config import EPOCHS, BATCH_SIZE, K_FOLDS
 
 # Enable mixed precision if GPU supports it (optional, speeds up training)
@@ -70,10 +70,6 @@ def train_model(model, model_name, X_train, y_train):
         # Split data into training and validation sets for the current fold
         X_train_fold, X_val_fold = X_train[train_index], X_train[val_index]
         y_train_fold, y_val_fold = y_train[train_index], y_train[val_index]
-
-        # Set up TensorBoard logging for visualization of training progress
-        log_dir = f"logs/{model_name}_fold_{fold_no}"
-        tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
 
         # Compile the model with the Adam optimizer and loss function
         model.compile(

@@ -29,12 +29,15 @@ def evaluate_single_model(model, X_test, y_test, class_names):
     y_pred = y_pred_probs.argmax(axis=1)
 
     # Print classification report including precision, recall, f1-score, and support for each class
+    print(f"\n---\n")
     print("Classification Report:")
     print(classification_report(y_test, y_pred, target_names=class_names))
+    print(f"---\n")
     
     # Calculate and print accuracy of the model
     accuracy = np.mean(y_pred == y_test)
     print(f"Accuracy: {accuracy:.2f}")
+    print(f"\n---\n")
     
     # Compute confusion matrix and plot it as a heatmap
     cm = confusion_matrix(y_test, y_pred)
@@ -60,6 +63,7 @@ def evaluate_single_model(model, X_test, y_test, class_names):
 
     # Calculate and print ROC AUC score for multiclass classification
     roc_auc = roc_auc_score(y_test_bin, y_pred_probs, average="macro", multi_class="ovr")
+    print(f"---\n")
     print(f"Multiclass ROC AUC Score: {roc_auc:.2f}")
 
     # Plot ROC curve for each class and display AUC values
@@ -74,6 +78,7 @@ def evaluate_single_model(model, X_test, y_test, class_names):
     plt.title("ROC Curve (Multiclass OvR)")
     plt.legend()
     plt.show()
+    print(f"---\n")
     
     # Plot precision-recall curve for each class and display AUC values
     plt.figure(figsize=(8, 6))
@@ -86,10 +91,12 @@ def evaluate_single_model(model, X_test, y_test, class_names):
     plt.title("Precision-Recall Curve")
     plt.legend()
     plt.show()
+    print(f"---\n")
 
     # Calculate additional metrics
     mcc = matthews_corrcoef(y_test, y_pred)
     print(f"MCC: {mcc:.2f}")
+    print(f"\n---\n")
 
     kappa = cohen_kappa_score(y_test, y_pred)
     print(f"Cohen's Kappa: {kappa:.2f}")

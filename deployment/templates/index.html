@@ -21,14 +21,21 @@
     <div class="card">
       <h1>🧠 NeuroScanAI</h1>
 
-      <!-- App instructions -->
-      <div class="instructions">
-        <p>
-          Upload a brain MRI image with a <strong>black background</strong>. The model will classify it as 
-          <strong>Glioma</strong>, <strong>Meningioma</strong>, <strong>Pituitary</strong>, or <strong>None</strong>, 
-          and show the <strong>predicted class</strong> with a <strong>confidence score</strong>.
-        </p>
-      </div>    
+    <!-- App instructions -->
+    <div class="instructions">
+      <p class="instructions-text">
+        Upload a brain MRI image with a <strong>black background</strong>. Our AI will analyze it and classify the tumor as one of:
+      </p>
+      <div class="classification-row">
+        <div class="badge" data-tooltip="A fast-growing malignant brain tumor.">Glioma</div>
+        <div class="badge" data-tooltip="A tumor that arises from the meninges (brain lining).">Meningioma</div>
+        <div class="badge" data-tooltip="A tumor in the pituitary gland that affects hormones.">Pituitary</div>
+        <div class="badge" data-tooltip="No tumor detected in the image.">None</div>
+      </div>
+      <p class="instructions-text">
+        You'll receive the <strong>predicted class</strong> and a <strong>confidence score</strong>.
+      </p>
+    </div>
 
       <!-- Upload form section -->
       <form id="upload-form">
@@ -57,14 +64,16 @@
       <div id="result"></div>
 
       <!-- Upload history -->
-      <div id="history" class="history">
-        <strong>Upload History</strong>
-        <div id="history-entries"></div>
-      </div>    
+      <div class="history-wrapper">
+        <strong class="history-title">Upload History</strong>
+        <div id="history" class="history scroll-reveal">
+          <div id="history-entries"></div>
+        </div>
+      </div>
     </div>
   </div>
-  <div id="scroll-hint" class="scroll-hint"><strong>Scroll down ↓</strong></div>
 
+  <div id="scroll-hint" class="scroll-hint"><strong>Scroll down ↓</strong></div>
 
   <!-- Main JS file -->
   <script src="{{ url_for('static', filename='script.js') }}"></script>

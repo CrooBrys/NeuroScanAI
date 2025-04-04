@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>NeuroScanAI — Brain Tumor Classifier</title>
@@ -8,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
   <!-- Toggle for light/dark mode -->
   <div class="theme-toggle">
@@ -21,21 +23,37 @@
     <div class="card">
       <h1>🧠 NeuroScanAI</h1>
 
-    <!-- App instructions -->
-    <div class="instructions">
-      <p class="instructions-text">
-        Upload a brain MRI image with a <strong>black background</strong>. Our AI will analyze it and classify the tumor as one of:
-      </p>
-      <div class="classification-row">
-        <div class="badge" data-tooltip="A fast-growing malignant brain tumor.">Glioma</div>
-        <div class="badge" data-tooltip="A tumor that arises from the meninges (brain lining).">Meningioma</div>
-        <div class="badge" data-tooltip="A tumor in the pituitary gland that affects hormones.">Pituitary</div>
-        <div class="badge" data-tooltip="No tumor detected in the image.">None</div>
+      <!-- App instructions -->
+      <div class="instructions">
+        <p class="instructions-text">
+          Upload a brain MRI scan taken from the <strong>top, side, front, or back</strong> view. The image should have
+          a <strong>black background</strong>, and resemble the examples shown when hovering over each tumor type below:
+        </p>
+        <div class="classification-row">
+          <div class="badge" data-tooltip-html="
+          <img src='/static/images/glioma.jpg' class='tooltip-img'><br>
+          Aggressive tumor growing from glial cells, often with swelling around it.
+        ">Glioma</div>
+
+        <div class="badge" data-tooltip-html="
+          <img src='/static/images/meningioma.jpg' class='tooltip-img'><br>
+          Typically near the brain’s surface, growing from the protective membranes.
+        ">Meningioma</div>
+
+        <div class="badge" data-tooltip-html="
+          <img src='/static/images/pituitary.jpg' class='tooltip-img'><br>
+          Centered near the base of the brain, can affect vision or hormones.
+        ">Pituitary</div>
+
+        <div class="badge" data-tooltip-html="
+          <img src='/static/images/none.jpg' class='tooltip-img'><br>
+          A normal scan with no visible tumor or abnormality present.
+        ">None</div>
+        </div>
+        <p class="instructions-text">
+          You'll receive the <strong>predicted class</strong> and a <strong>confidence score</strong>.
+        </p>
       </div>
-      <p class="instructions-text">
-        You'll receive the <strong>predicted class</strong> and a <strong>confidence score</strong>.
-      </p>
-    </div>
 
       <!-- Upload form section -->
       <form id="upload-form">
@@ -78,4 +96,5 @@
   <!-- Main JS file -->
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
+
 </html>

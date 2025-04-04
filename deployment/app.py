@@ -13,7 +13,7 @@ from PIL import Image
 from google.cloud import storage
 app = Flask(__name__)
 bucket_name = os.environ.get("GCS_BUCKET")
-IS_LOCAL = True  # Set to True if testing from ../training/models folder
+IS_LOCAL = False  # Set to True if testing from ../training/models folder
 
 CLASS_NAMES = ['Glioma', 'Meningioma', 'None', 'Pituitary']
 

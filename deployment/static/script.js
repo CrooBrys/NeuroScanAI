@@ -11,6 +11,28 @@ document.addEventListener("DOMContentLoaded", function () {
   const toggle = document.getElementById("dark-toggle");
 
 
+  document.querySelectorAll('.badge').forEach(badge => {
+    badge.addEventListener('mouseenter', function (e) {
+      let tooltip = document.createElement('div');
+      tooltip.className = 'custom-tooltip';
+      tooltip.innerHTML = this.getAttribute('data-tooltip-html');
+      document.body.appendChild(tooltip);
+  
+      const rect = this.getBoundingClientRect();
+      tooltip.style.left = `${rect.left + rect.width / 2}px`;
+      tooltip.style.top = `${rect.bottom + 8}px`;
+  
+      this._tooltip = tooltip;
+    });
+  
+    badge.addEventListener('mouseleave', function () {
+      if (this._tooltip) {
+        document.body.removeChild(this._tooltip);
+        this._tooltip = null;
+      }
+    });
+  });
+
   // Dark mode toggle
   toggle.addEventListener("change", () => {
     document.body.classList.toggle("dark", toggle.checked);
@@ -115,7 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
         historyEntry.querySelector(".history-bar").appendChild(historyFill);
         historyContainer.prepend(historyEntry);
-
+        history.scrollTop = 0;  // <- Scroll to top so new entry is visible
         checkHistoryScrollState(); // Update scrollbar logic
       }
     } catch (err) {

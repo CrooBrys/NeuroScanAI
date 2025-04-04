@@ -4,3 +4,4 @@ numpy==1.24.4
 Pillow==10.2.0
 gunicorn
 google-cloud-storage
+opencv-python

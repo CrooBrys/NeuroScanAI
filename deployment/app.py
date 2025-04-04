@@ -3,7 +3,7 @@ import os
 # Suppress TensorFlow warnings
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
+import cv2
 import traceback
 from flask import Flask, request, jsonify, render_template
 from tensorflow.keras.models import load_model
@@ -11,7 +11,6 @@ from tensorflow.keras.applications import resnet50, vgg16, efficientnet, incepti
 import numpy as np
 from PIL import Image
 from google.cloud import storage
-import io
 app = Flask(__name__)
 bucket_name = os.environ.get("GCS_BUCKET")
 IS_LOCAL = True  # Set to True if testing from ../training/models folder
@@ -21,27 +20,33 @@ CLASS_NAMES = ['Glioma', 'Meningioma', 'None', 'Pituitary']
 def preprocess_image(image_bytes, model_name):
     try:
         print("[DEBUG] Starting image preprocessing...")
-        image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-        image = image.resize((224, 224))
-        image = np.asarray(image).astype('float32')
 
+        # Decode and convert like training
+        npimg = np.frombuffer(image_bytes, np.uint8)
+        img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)  # BGR
+        if img is None:
+            raise ValueError("Could not decode image")
+
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)   # Convert to RGB
+        img = cv2.resize(img, (224, 224)).astype("float32")
+
+        # Model-specific normalization
         if model_name == "ResNet50.keras":
-            image = resnet50.preprocess_input(image)
+            img = resnet50.preprocess_input(img)
         elif model_name == "VGG16.keras":
-            image = vgg16.preprocess_input(image)
+            img = vgg16.preprocess_input(img)
         elif model_name == "EfficientNetB0.keras":
-            image = efficientnet.preprocess_input(image)
+            img = efficientnet.preprocess_input(img)
         elif model_name == "InceptionV3.keras":
-            image = inception_v3.preprocess_input(image)
+            img = inception_v3.preprocess_input(img)
         else:
             raise ValueError(f"Unsupported model: {model_name}")
 
-        image = np.expand_dims(image, axis=0)
         print("[DEBUG] Preprocessing complete.")
-        return image
+        return np.expand_dims(img, axis=0)
+
     except Exception as e:
         print(f"[DEBUG] Error during preprocessing: {e}")
-        traceback.print_exc()
         raise
 
 @app.route('/')

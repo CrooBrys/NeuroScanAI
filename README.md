@@ -1,150 +1,179 @@
-# Brain Tumor Classification (MRI)
+# 🧠 NeuroScanAI
+
+NeuroScanAI is a deep learning-based tool for classifying brain MRI scans into one of four categories: **Glioma**, **Meningioma**, **Pituitary**, or **None** (no tumor). It offers both a model training pipeline and an interactive web interface for live predictions.
+
+We evaluate and compare the performance of four popular convolutional neural networks:
+**ResNet50**, **VGG16**, **EfficientNetB0**, and **InceptionV3** — each trained and validated using Stratified K-Fold cross-validation.
 
 ---
 
-## Overview  
-This project aims to classify brain tumors using MRI scans. The dataset consists of four categories: **Glioma, Meningioma, Pituitary, and None (No tumor)**. The goal is to train and evaluate multiple models to determine the best-performing classifier and deploy a simple application for real-time MRI classification.
+## Live Demo (Google Cloud Run)
+> Try the deployed version here: [**NeuroScanAI Demo**](https://brain-app-427956346530.us-central1.run.app)
+
+This deployment is hosted using **Google Cloud Run**, a fully managed, serverless platform that runs containerized applications with automatic scaling. We containerized our Flask app using the `Dockerfile` in the `deployment/` directory, then uploaded it to Cloud Run. Our four trained `.keras` models are stored in **Google Cloud Storage** and loaded dynamically at runtime.
 
 ---
 
-## Dataset  
-**Source:** [Kaggle - Brain Tumor Classification (MRI)](https://www.kaggle.com/datasets/sartajbhuvaji/brain-tumor-classification-mri)  
+## Dataset Info
 
-- **Image Format:** JPG  
-- **Classes:** Glioma, Meningioma, Pituitary, None  
-- **Pre-split Dataset:** Training & Testing  
+- **Source**: [Brain Tumor Classification (MRI) Dataset - Kaggle](https://www.kaggle.com/datasets/sartajbhuvaji/brain-tumor-classification-mri)
+- **License**: MIT License
+- **Provided Format**:
+  - Grayscale `.jpg` MRI scans with black backgrounds
+  - Pre-split into `Training/` and `Testing/` directories, each containing four subfolders (one per class)
+- **Preprocessing**:
+  - Images were converted to **RGB** and resized to **224x224** for model input compatibility
+  - We **merged all images into a single `data/` folder**, organized by four class folders:
+    - `Glioma/`
+    - `Meningioma/`
+    - `Pituitary/`
+    - `None/`
+- **Classification Task**: Supervised multi-class classification (4 categories)
 
 ---
 
-## Project Structure  
-```
-│── /deployment (Flask Web App)
-│   │── /static (CSS, JS, images for the web interface)
-│   │── /templates (HTML templates for the web app)
-│   │── app.py (Flask server script)
-│   │── model.pth or model.h5 (Trained model for inference)
-│   │── requirements.txt (Dependencies for running Flask app)
+## Project Structure
+
+The repository is organized into two main components: `deployment/` for the web app, and `training/` for the model development pipeline.
+
+```bash
+cs4442_final_project/
 │
-│── /training (Machine Learning Code)
-│   │── /data (Dataset Folder)
-│   │   │── /testing
-│   │   │   │── Glioma (Images of Glioma tumors)
-│   │   │   │── Meningioma (Images of Meningioma tumors)
-│   │   │   │── None (Images without tumors)
-│   │   │   │── Pituitary (Images of Pituitary tumors)
-│   │   │── /training
-│   │   │   │── Glioma (Images of Glioma tumors)
-│   │   │   │── Meningioma (Images of Meningioma tumors)
-│   │   │   │── None (Images without tumors)
-│   │   │   │── Pituitary (Images of Pituitary tumors)
-│   │── brain_tumor_classification.ipynb (Jupyter Notebook for experiments, visualizations, and analysis)
-│   │── evaluate.py (Model evaluation and metrics calculation)
-│   │── model_utils.py (Helper functions for model building and training)
-│   │── preprocess.py (Handles data preprocessing and augmentation)
-│   │── train.py (Model training script)
+├── deployment/               # Flask-based frontend + backend for prediction
+│   ├── static/               # Static assets (JS, CSS, and tooltip examples)
+│   │   ├── images/           # Sample MRI images for each tumor class
+│   │   ├── script.js         # Handles image upload, preview, results, tooltips
+│   │   └── style.css         # Light/dark theme and component styling
+│   │
+│   ├── templates/            # HTML templates
+│   │   └── index.html        # Main web interface layout
+│   │
+│   ├── app.py                # Main Flask server application
+│   ├── Dockerfile            # Docker config for Cloud Run deployment
+│   └── requirements.txt      # Dependencies for deployment environment
 │
-│── .gitignore (Files to ignore in version control)
-│── README.md (Project documentation)
-│── requirements.txt (General dependencies)
+├── training/                 # All training scripts, data, and notebooks
+│   ├── data/                 # Merged dataset with subfolders per class
+│   │   ├── Glioma/
+│   │   ├── Meningioma/
+│   │   ├── None/
+│   │   └── Pituitary/
+│   │
+│   ├── models/               # Saved Keras model files from training
+│   │
+│   ├── brain_tumor_classification.ipynb   # End-to-end training & analysis notebook
+│   ├── config.py                         # Hyperparameters and constants
+│   ├── data_augmentation.py              # Functions for augmenting MRI data
+│   ├── data_preprocessing.py             # Image preprocessing routines
+│   ├── feature_extraction.py             # Model feature extraction functions
+│   ├── model_evaluation.py               # Evaluation, visualization, and metrics
+│   ├── model_training.py                 # K-fold training logic with saving/loading
+│   ├── requirements.txt                  # Dependencies for training pipeline
+│   └── utils.py                          # Reusable helper functions for training
+│
+├── .gitignore                # Standard Git ignore rules
+└── README.md                 # Project overview and usage guide
+
 ```
 
 ---
 
-## Project Workflow  
-### **1. Data Preprocessing**  
-- Merge existing training & test datasets.  
-- Create a custom **70/30 train-test split** with **k-fold cross-validation**.  
-- Check image integrity and standardize dimensions.  
+## Getting Started
 
-### **2. Data Augmentation**  
-- Apply geometric transformations (rotation, flipping, zooming, etc.).  
-- Adjust brightness, contrast, and add noise.  
+Ensure you have **Python 3.11** installed before proceeding.
 
-### **3. Feature Engineering & Normalization**  
-- Scale pixel values to **0-1**.  
-- Extract features using **pre-trained CNNs (ResNet, VGG, EfficientNet)**.  
+Clone the repository:
 
-### **4. Model Selection & Training**  
-- Train **CNN-based models**.  
-- Experiment with the most popular models for this task:  
-  - **ResNet50**  
-  - **VGG16**  
-  - **EfficientNetB0**  
-  - **InceptionV3**  
-- Apply **hyperparameter tuning** and **k-fold cross-validation**.  
-
-### **5. Model Evaluation**  
-- Use metrics like **F1-score, Recall, Precision, AUC-ROC**.  
-- Analyze results with a confusion matrix.  
-- The **Jupyter Notebook (`brain_tumor_classification.ipynb`) generates plots** of:
-  - Loss and accuracy curves
-  - Confusion matrices
-  - ROC curves
-  - Sample image predictions with model confidence scores
-
-### **6. Deployment**  
-- Develop a simple **Flask-based local application**.  
-- Allow users to upload MRI images for classification.  
-
----
-
-## Dependencies  
-- Python 3.x  
-- TensorFlow / PyTorch  
-- OpenCV  
-- Scikit-learn  
-- Matplotlib / Seaborn  
-- Flask (for deployment)  
-
----
-
-## Usage  
-### **1. Clone the Repository**  
 ```bash
 git clone https://github.com/chiggi24/cs4442_final_project.git
+cd cs4442_final_project
 ```
 
-### **2. Install Dependencies**  
+---
+
+## Running the Training Notebook
+
+> Located in `training/brain_tumor_classification.ipynb`
+
+- Make sure you're inside the cloned `cs4442_final_project` directory.
+- Navigate to the `training/` folder:
+
+```bash
+cd training
+```
+- Create and activate a virtual environment using Python 3.11:
+
+```bash
+python3.11 -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+```
+- Install the required dependencies:
 ```bash
 pip install -r requirements.txt
 ```
-
-### **3. Running the Code**  
-Use an editor like **VS Code, Jupyter Notebook, or any Python IDE** to open and execute the `.ipynb` or `.py` scripts.  
-
-### **4. Training the Model**  
-Run the script that contains the model training steps:  
+- Register the environment as a new Jupyter kernel:
 ```bash
-python training/train.py
+python -m ipykernel install --user --name=neuroscanai --display-name "NeuroScanAI"
 ```
-To **visualize training results**, open the `brain_tumor_classification.ipynb` notebook and run the cells to generate:
-- Model accuracy & loss curves
-- Confusion matrix
-- ROC curve
-- Sample MRI classification predictions with confidence scores
 
-### **5. Deployment (Local Flask App)**  
-Run the Flask application locally:  
+- Launch Jupyter Notebook and in the top-right dropdown, select the `NeuroScanAI` kernel
+- All training code, plots, and evaluation logic are included
+- Trained `.keras` models will be saved into the `training/models/` directory
+
+---
+
+## Local Deployment (Flask Web App)
+
+> Ensure you're using **Python 3.11** for TensorFlow compatibility.
+
+- From the project root (`cs4442_final_project/`), navigate to the `deployment/` folder:
+
 ```bash
 cd deployment
-python app.py
 ```
-Then open a browser and go to:  
+- Create and activate a virtual environment:
 ```bash
-http://127.0.0.1:5000
+python3.11 -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
 ```
-Here, you can upload MRI images for classification.  
+- Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+Run the Flask app:
+```bash
+python app.py 
+```
+- Open your browser and go to: [http://localhost:8080](http://localhost:8080)
+
+> **Note**: To speed up training during testing, you can reduce the number of epochs and K-folds in `training/config.py`:
+
+```python
+# Number of training epochs
+EPOCHS = 2  
+
+# Number of folds for K-Fold Cross-Validation 
+K_FOLDS = 2
+```
+
+---
+
+## Dependencies
+
+The project maintains **separate environments** for training and deployment, each with its own set of dependencies defined in `requirements.txt`.
+
+### Key libraries:
+- **TensorFlow** – Core deep learning framework for model development and inference
+- **OpenCV** – Image preprocessing and format handling
+- **Matplotlib** & **Seaborn** – Visualization of metrics and results
+- **Scikit-learn** – Metrics, preprocessing, and validation utilities
+- **Flask** – Lightweight web framework used for deployment
+- **Google Cloud Storage** – Access to hosted `.keras` models in production
+- **Pillow** – Support for image file operations
 
 ---
 
 ## Contributors  
-- **Christopher Higgins**
-- **Bryson Crook**
+- **Christopher Higgins**  
+- **Bryson Crook**  
 - **Mohamed El Dogdog**
-
----
-
-## License  
-MIT License  
-
----

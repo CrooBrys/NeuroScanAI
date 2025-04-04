@@ -104,56 +104,51 @@ def evaluate_single_model(model, X_test, y_test, class_names):
 # Function to compare multiple models and present their performance in a formatted table
 def compare_models(trained_models):
     """
-    Compares the performance of multiple trained models and presents the results in a formatted table.
+    Compares the performance of multiple trained models and presents the results in a grouped DataFrame.
 
     Args:
-        trained_models (dict): Dictionary where keys are model names and values are the corresponding model data (including predictions and true labels).
+        trained_models (dict): Dictionary where keys are model names and values are the corresponding model data.
 
     Returns:
-        pd.DataFrame: DataFrame with performance metrics for each model and class.
+        pd.DataFrame: Multi-index column DataFrame with performance metrics grouped by model.
     """
-    all_results = {}  # Dictionary to store results of each model
+    all_results = {}  # Dictionary to hold results
     print("Evaluating Models...\n")
 
-    # Loop over each trained model for evaluation
     for model_name, data in trained_models.items():
-        y_pred_probs = data["model"].predict(data["X_test"])  # Get predicted probabilities
-        y_pred = y_pred_probs.argmax(axis=1)  # Convert probabilities to class predictions
-        y_test_bin = label_binarize(data["y_test"], classes=np.arange(len(data["class_names"])))  # Binarize true labels
+        y_pred_probs = data["model"].predict(data["X_test"])
+        y_pred = y_pred_probs.argmax(axis=1)
+        y_test_bin = label_binarize(data["y_test"], classes=np.arange(len(data["class_names"])))
 
-        per_class_metrics = []  # List to store metrics for each class
+        per_class_metrics = []
 
-        # Loop over each class to calculate precision, recall, and F1-score
         for class_idx in range(len(data["class_names"])):
-
             class_precision = precision_score(data["y_test"], y_pred, labels=[class_idx], average="macro", zero_division=0)
             class_recall = recall_score(data["y_test"], y_pred, labels=[class_idx], average="macro", zero_division=0)
             class_f1 = f1_score(data["y_test"], y_pred, labels=[class_idx], average="macro", zero_division=0)
             per_class_metrics.append([class_precision, class_recall, class_f1])
 
-        # Create a DataFrame to display per-class metrics
         per_class_df = pd.DataFrame(per_class_metrics, columns=["Precision", "Recall", "F1-score"])
 
-        # Calculate macro-average metrics and accuracy
+        # Add summary rows
         accuracy = np.mean(y_pred == data["y_test"])
         macro_precision = precision_score(data["y_test"], y_pred, average="macro")
         macro_recall = recall_score(data["y_test"], y_pred, average="macro")
         macro_f1 = f1_score(data["y_test"], y_pred, average="macro")
 
-        # Add average row to the DataFrame
         per_class_df.loc["Average"] = [macro_precision, macro_recall, macro_f1]
-        per_class_df.loc["Accuracy"] = [accuracy, np.nan, np.nan]  # Accuracy is a single value, so it's added once
+        per_class_df.loc["Accuracy"] = [accuracy, np.nan, np.nan]
 
-        # Store the results in the all_results dictionary
+        # Create MultiIndex columns: (model_name, metric)
+        per_class_df.columns = pd.MultiIndex.from_product([[model_name], per_class_df.columns])
         all_results[model_name] = per_class_df
 
-    # Combine the individual model results into one DataFrame
-    combined_df = pd.concat(all_results, axis=1)
-    
-    # Format the combined DataFrame
-    combined_df = combined_df.round(2)  # Round metrics to 2 decimal places for clarity
-    combined_df.fillna("", inplace=True)  # Remove NaNs to clean up the table
-    combined_df.index.name = "CLASS"  # Label the index column as "CLASS"
+    # Concatenate all models horizontally
+    combined_df = pd.concat(all_results.values(), axis=1)
 
-    # Return the formatted DataFrame with all model comparison results
+    # Formatting
+    combined_df = combined_df.round(2)
+    combined_df.fillna("", inplace=True)
+    combined_df.index.name = "CLASS"
+
     return combined_df

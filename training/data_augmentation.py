@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from utils import plot_class_distribution
+from sklearn.utils import shuffle
 
 # Function to balance the dataset by augmenting under-represented classes
 def balance_with_augmentation(X, y, class_names, target_class_size=None, verbose=True, samples_per_class=3, random_state=42):
@@ -84,7 +85,12 @@ def balance_with_augmentation(X, y, class_names, target_class_size=None, verbose
                 plt.tight_layout()  # Adjust layout to prevent overlap
                 plt.show()  # Show the subplot with the original and augmented images
 
-    X_balanced, y_balanced = np.array(X_balanced), np.array(y_balanced)  # Convert lists to numpy arrays
+    # Convert lists to numpy arrays
+    X_balanced = np.array(X_balanced)
+    y_balanced = np.array(y_balanced)
+
+    # Shuffle the balanced dataset to randomize class order
+    X_balanced, y_balanced = shuffle(X_balanced, y_balanced, random_state=random_state)
 
     if verbose:
         # Print the distribution of classes in the augmented dataset

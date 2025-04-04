@@ -35,7 +35,7 @@ def apply_model_preprocessing(X, model_name):
     elif model_name == "InceptionV3":
         return inception_v3.preprocess_input(X)  # Apply InceptionV3 specific preprocessing
     else:
-        return X / 255.0  # Normalize pixel values to [0,1] for unknown models
+        raise ValueError(f"Unsupported model name: {model_name}")
 
 # Function to load images and labels
 def load_all_images():

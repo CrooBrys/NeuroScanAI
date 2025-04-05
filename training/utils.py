@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-from matplotlib import cm
+import numpy as np
 
 # Function to plot class distribution
 def plot_class_distribution(y, class_names, title="Class Distribution"):
@@ -21,32 +21,31 @@ def plot_class_distribution(y, class_names, title="Class Distribution"):
     plt.legend(title="Tumor Types", loc='upper right')  # Add a legend to indicate class labels
     plt.show()  # Display the plot
     
-def plot_validation_accuracy_boxplot(validation_accuracies_per_model):
+def plot_accuracy_bar_with_std(data):
     """
-    Plots a boxplot comparing validation accuracy distributions for multiple models.
-
-    Args:
-        validation_accuracies_per_model (dict): Dictionary with model names as keys and
-                                                lists of validation accuracies as values.
+    Plots mean validation accuracy per model with standard deviation error bars.
+    Bars are color-coded, values are labeled above the bars, and layout is clean for reports.
     """
-    plt.figure(figsize=(10, 6))
-    model_names = list(validation_accuracies_per_model.keys())
-    data = [validation_accuracies_per_model[name] for name in model_names]
+    model_names = list(data.keys())
+    means = [np.mean(v) for v in data.values()]
+    stds = [np.std(v) for v in data.values()]
+    colors = ['#4C72B0', '#55A868', '#C44E52', '#8172B2']  # Distinct colors
 
-    box = plt.boxplot(data, patch_artist=True, tick_labels=model_names)
-    cmap = cm.get_cmap('tab10')
+    plt.figure(figsize=(8, 4))
+    bars = plt.bar(model_names, means, yerr=stds, capsize=6,
+                   color=colors, edgecolor='black')
 
-    for i, patch in enumerate(box['boxes']):
-        color = cmap(i % cmap.N)
-        patch.set_facecolor(color)
+    # Compute max y to adjust plot range
+    max_y = max(mean + std for mean, std in zip(means, stds))
+    plt.ylim(0.90, max_y + 0.01)
 
-    for median in box['medians']:
-        median.set_color('black')
-        median.set_linewidth(2)
+    # Add labels slightly above the error bar (clear of the line)
+    for i, (mean, std) in enumerate(zip(means, stds)):
+        label_y = mean + std + 0.004  # Give some buffer above the error bar
+        plt.text(i, label_y, f"{mean:.4f}", ha='center', fontsize=10, fontweight='bold', color='black')
 
-    plt.title("Model Comparison: Validation Accuracy Distribution")
-    plt.ylabel("Validation Accuracy")
-    plt.xlabel("Model")
-    plt.grid(True)
+    plt.ylabel("Mean Validation Accuracy")
+    plt.title("Model Accuracy with Standard Deviation (5-Fold CV)")
+    plt.grid(axis='y', linestyle='--', alpha=0.5)
     plt.tight_layout()
     plt.show()

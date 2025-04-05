@@ -131,6 +131,7 @@ def preprocess_data(model_name, verbose=True):
         print(f"  Total Images: {len(X)}")  # Print total number of images
         print(f"  Image Shape: {X.shape[1:]}")  # Print the shape of the images (height, width, channels)
         print(f"\n---")
+    
 
     # Dynamically determine max class size for augmentation
     max_class_size = max(np.bincount(y))  # Find the maximum number of samples in any class
@@ -147,11 +148,43 @@ def preprocess_data(model_name, verbose=True):
     )
 
     if verbose:  # If verbose output is enabled
+                # Display comparison of preprocessing across models for a single image
+        sample_idx = 0  # Use the first image (or pick another index)
+        sample_image = X[sample_idx]
+        preprocessed_images = []
+
+        # Apply each preprocessing function
+        for name, preprocess_fn in {
+            "Original": lambda x: x,
+            "ResNet50": resnet50.preprocess_input,
+            "VGG16": vgg16.preprocess_input,
+            "EfficientNetB0": efficientnet.preprocess_input,
+            "InceptionV3": inception_v3.preprocess_input,
+        }.items():
+            # Make sure input is float32 for preprocessing
+            img = sample_image.astype("float32")
+            processed = preprocess_fn(np.expand_dims(img, axis=0))[0]
+            # Normalize to [0, 1] for display purposes (may look odd for some models but shows effects)
+            processed = (processed - processed.min()) / (processed.max() - processed.min() + 1e-5)
+            preprocessed_images.append((name, processed))
+
+        # Plot the 1x5 grid of images
+        plt.figure(figsize=(15, 3))
+        for i, (name, img) in enumerate(preprocessed_images):
+            ax = plt.subplot(1, 5, i + 1)
+            ax.imshow(img)
+            ax.set_title(name, fontsize=10)
+            ax.axis("off")
+        plt.suptitle("Preprocessing Comparison Across Models", fontsize=14)
+        plt.tight_layout()
+        plt.show()
+        print(f"---\n")
         print("Train dataset distribution:", np.bincount(y_train).tolist())  # Print the distribution of classes in the training set
         print("Test dataset distribution:", np.bincount(y_test).tolist())  # Print the distribution of classes in the testing set
         plot_class_distribution(y_train, class_names, "Training Class Distribution")  # Plot the training class distribution
         plot_class_distribution(y_test, class_names, "Testing Class Distribution")  # Plot the testing class distribution
         print(f"---\n")
         visualize_pca(X_train, y_train, "PCA of Training Data")  # Visualize PCA of the training data
+        
 
     return X_train, X_test, y_train, y_test, class_names  # Return the processed data

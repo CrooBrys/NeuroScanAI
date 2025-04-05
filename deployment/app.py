@@ -1,4 +1,9 @@
 import os
+
+# Suppress TensorFlow warnings
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 import cv2
 import traceback
 import numpy as np
@@ -7,10 +12,6 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.applications import resnet50, vgg16, efficientnet, inception_v3
 from PIL import Image
 from google.cloud import storage
-
-# Suppress TensorFlow warnings
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 app = Flask(__name__)
 bucket_name = os.environ.get("GCS_BUCKET")

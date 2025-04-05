@@ -8,7 +8,7 @@ We evaluate and compare the performance of four popular convolutional neural net
 ---
 
 ## Live Demo (Google Cloud Run)
-> Try the deployed version here: [**NeuroScanAI Demo**](https://brain-app-427956346530.us-central1.run.app)
+> Try the deployed version here: [**NeuroScanAI Demo**](https://neuroscanai-427956346530.us-central1.run.app/)
 
 This deployment is hosted using **Google Cloud Run**, a fully managed, serverless platform that runs containerized applications with automatic scaling. We containerized our Flask app using the `Dockerfile` in the `deployment/` directory, then uploaded it to Cloud Run. Our four trained `.keras` models are stored in **Google Cloud Storage** and loaded dynamically at runtime.
 

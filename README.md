@@ -1,6 +1,6 @@
 # 🧠 NeuroScanAI
 
-NeuroScanAI is a deep learning-based tool for classifying brain MRI scans into one of four categories: **Glioma**, **Meningioma**, **Pituitary**, or **None** (no tumor). It offers both a model training pipeline and an interactive web interface for live predictions.
+NeuroScanAI is a deep learning-based tool for classifying brain MRI scans into one of four categories: **Glioma**, **Meningioma**, **Pituitary**, or **None** (no tumour). It offers both a model training pipeline and an interactive web interface for live predictions.
 
 We evaluate and compare the performance of four popular convolutional neural networks:
 **ResNet50**, **VGG16**, **EfficientNetB0**, and **InceptionV3** — each trained and validated using Stratified K-Fold cross-validation.
@@ -41,7 +41,7 @@ cs4442_final_project/
 │
 ├── deployment/               # Flask-based frontend + backend for prediction
 │   ├── static/               # Static assets (JS, CSS, and tooltip examples)
-│   │   ├── images/           # Sample MRI images for each tumor class
+│   │   ├── images/           # Sample MRI images for each tumour class
 │   │   ├── script.js         # Handles image upload, preview, results, tooltips
 │   │   └── style.css         # Light/dark theme and component styling
 │   │

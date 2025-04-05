@@ -14,7 +14,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 app = Flask(__name__)
 bucket_name = os.environ.get("GCS_BUCKET")
-IS_LOCAL = True  # Set to False if deploying with GCS
+IS_LOCAL = os.environ.get("IS_LOCAL", "True").lower() == "true"
 
 CLASS_NAMES = ['Glioma', 'Meningioma', 'None', 'Pituitary']
 model_cache = {}  # Cache for loaded models

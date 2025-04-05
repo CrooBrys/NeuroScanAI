@@ -131,6 +131,7 @@ document.addEventListener("DOMContentLoaded", function () {
           <div class="history-meta">
             <strong>${fileName}</strong> &mdash; ${timestamp}
           </div>
+          <div>Model: <strong>${selectedModel.replace('.keras', '')}</strong></div>
           <div>Prediction: <strong>${data.class}</strong></div>
           <div class="confidence-bar history-bar"></div>
           <hr>

@@ -109,12 +109,23 @@ def train_model(model, model_name, X_train, y_train):
     model = tf.keras.models.load_model(checkpoint_path)
     print(f"\nBest model saved to: {checkpoint_path}")
 
-    # Compute and plot average loss and accuracy
-    avg_train_loss = np.mean(all_train_losses, axis=0)
-    avg_val_loss = np.mean(all_val_losses, axis=0)
-    avg_train_accuracy = np.mean(all_train_accuracies, axis=0)
-    avg_val_accuracy = np.mean(all_val_accuracies, axis=0)
+    def pad_with_nan(sequences, maxlen):
+        return np.array([
+            np.pad(seq, (0, maxlen - len(seq)), constant_values=np.nan)
+            for seq in sequences
+        ])
 
+    max_len = max(len(x) for x in all_train_losses)
+
+    all_train_losses_padded = pad_with_nan(all_train_losses, max_len)
+    all_val_losses_padded = pad_with_nan(all_val_losses, max_len)
+    all_train_accuracies_padded = pad_with_nan(all_train_accuracies, max_len)
+    all_val_accuracies_padded = pad_with_nan(all_val_accuracies, max_len)
+
+    avg_train_loss = np.nanmean(all_train_losses_padded, axis=0)
+    avg_val_loss = np.nanmean(all_val_losses_padded, axis=0)
+    avg_train_accuracy = np.nanmean(all_train_accuracies_padded, axis=0)
+    avg_val_accuracy = np.nanmean(all_val_accuracies_padded, axis=0)
     plt.figure(figsize=(14, 6))
 
     plt.subplot(1, 2, 1)

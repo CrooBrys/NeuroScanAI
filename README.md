@@ -146,7 +146,7 @@ python app.py
 ```
 - Open your browser and go to: [http://localhost:8080](http://localhost:8080)
 
-> **Note**: To speed up training during testing, you can reduce the number of epochs and K-folds in `training/config.py`:
+> **Note 1**: To speed up training during testing, you can reduce the number of epochs and K-folds in `training/config.py`:
 
 ```python
 # Number of training epochs
@@ -155,6 +155,8 @@ EPOCHS = 2
 # Number of folds for K-Fold Cross-Validation 
 K_FOLDS = 2
 ```
+
+> **Note 2**: If you prefer to skip training and use pre-existing trained models instead, you can download them from the following [Pre-trained Models (Google Drive)](https://drive.google.com/drive/folders/1qr_dh3GFHygpjIOCY8k6aU1itj16Ydxl). After downloading, place the `.keras` model files into the `training/models/` directory.
 
 ---
 
